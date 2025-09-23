@@ -58,11 +58,22 @@ async function ensureSchema(client) {
     CREATE TABLE IF NOT EXISTS templates (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
-      type TEXT NOT NULL, -- 'contract', 'statuto', etc.
-      content TEXT NOT NULL,     -- base64 or plain text
+      type TEXT NOT NULL,
+      content TEXT NOT NULL,
       encoding TEXT DEFAULT 'base64',
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    -- NUOVO: membri CER
+    CREATE TABLE IF NOT EXISTS cer_members (
+      id TEXT PRIMARY KEY,
+      cer_id TEXT NOT NULL,
+      customer_id TEXT NOT NULL,
+      role TEXT NOT NULL,  -- 'producer' | 'consumer'
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_cer_members_cer ON cer_members(cer_id);
+    CREATE INDEX IF NOT EXISTS idx_cer_members_customer ON cer_members(customer_id);
   `);
 }
 
