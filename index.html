@@ -8,21 +8,10 @@
   <body>
     <div id="root"></div>
 
-    <!-- Netlify Identity widget -->
+    <!-- Widget Identity: va bene anche se lo ricarichiamo da App.tsx in fallback -->
     <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
-    <!-- Inizializza Identity e ricarica su login/logout -->
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        if (window.netlifyIdentity) {
-          window.netlifyIdentity.on('login',  () => window.location.reload());
-          window.netlifyIdentity.on('logout', () => window.location.reload());
-          window.netlifyIdentity.init();
-        }
-      });
-    </script>
-
-    <!-- Entry React/Vite -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+
