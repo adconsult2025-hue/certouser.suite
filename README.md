@@ -1,4 +1,4 @@
-# CERtoUSER Suite — Starter (Neon-ready)
+# CERtoUSER Suite — Starter
 
 ## Prerequisiti
 - Repo collegato a Netlify
