@@ -49,14 +49,4 @@ export default function App() {
         <nav className="nav">
           <div className="brand">CER to USER — Suite</div>
           <ul>
-            <li><Link to="/">Hub</Link></li>
-            <li><Link to="/crm">CRM</Link></li>
-            <li><Link to="/cer">CER</Link></li>
-            <li><Link to="/termo">Termo</Link></li>
-            <li><Link to="/contratti">Contratti</Link>
-
-
-      <p><button onClick={() => window.netlifyIdentity.logout()}>Esci</button></p>
-    </div>
-  )
-}
+            <li><Link to="/">Hub</Link
