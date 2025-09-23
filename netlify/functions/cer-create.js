@@ -1,6 +1,7 @@
+// netlify/functions/cer-create.js
 const { withClient, ensureSchema, success, failure } = require('./_db.js');
 
-const CER_FIXED = 15;
+const CER_FIXED = 15; // fisso a 15%
 const PROD_MAX  = 55;
 const PROS_MAX  = 50;
 
@@ -10,8 +11,7 @@ exports.handler = async (event) => {
     if (!p.name) return failure('Missing required field: name', 400);
 
     const prod = Number(p.split_prod ?? 0);
-    if (isNaN(prod)) return failure('Produttore non numerico', 400);
-    if (prod < 0 || prod > 100) return failure('Produttore fuori range 0–100', 400);
+    if (!Number.isFinite(prod) || prod < 0 || prod > 100) return failure('Produttore fuori range 0–100', 400);
     if (prod > PROD_MAX) return failure(`Produttore oltre ${PROD_MAX}%`, 400);
 
     // Prosumer = resto fino a max 50%
@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     if (rawPros > PROS_MAX) return failure(`Resto ai Consumers supera ${PROS_MAX}%: riduci Produttore`, 400);
 
     const quota = p.quota_shared == null ? null : Number(p.quota_shared);
-    if (quota != null && (isNaN(quota) || quota < 0 || quota > 100)) {
+    if (quota != null && (!Number.isFinite(quota) || quota < 0 || quota > 100)) {
       return failure('Quota condivisa fuori range 0–100', 400);
     }
 
