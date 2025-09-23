@@ -19,14 +19,20 @@ export default function App() {
   useEffect(() => {
     const ni = window.netlifyIdentity;
     if (!ni) return;
-    ni.on('init', (u: any) => setUser(u));
-    ni.on('login', (u: any) => { setUser(u); window.location.reload(); });
-    ni.on('logout', () => { setUser(null); window.location.reload(); });
+
+    const onInit   = (u: any) => setUser(u);
+    const onLogin  = (u: any) => { setUser(u); window.location.reload(); };
+    const onLogout = ()       => { setUser(null); window.location.reload(); };
+
+    ni.on('init', onInit);
+    ni.on('login', onLogin);
+    ni.on('logout', onLogout);
     ni.init();
+
     return () => {
-      ni.off && ni.off('init');
-      ni.off && ni.off('login');
-      ni.off && ni.off('logout');
+      ni.off && ni.off('init', onInit);
+      ni.off && ni.off('login', onLogin);
+      ni.off && ni.off('logout', onLogout);
     };
   }, []);
 
@@ -34,31 +40,21 @@ export default function App() {
   const logout    = () => window.netlifyIdentity?.logout();
 
   const email = user?.email || user?.user_metadata?.email || '';
-  // ruoli opzionali (se li usi in Identity → app_metadata.roles)
-  const roles: string[] =
-    (user?.app_metadata?.roles ?? user?.roles ?? []);
+  const roles: string[] = (user?.app_metadata?.roles ?? user?.roles ?? []);
   const isSuperAdmin = roles.includes('SuperAdmin');
 
   return (
     <BrowserRouter>
       <div className="app-shell">
         <nav className="nav">
-          <div className="brand">CER to USER —
+          <div className="brand">CER to USER — Suite</div>
+          <ul>
+            <li><Link to="/">Hub</Link></li>
+            <li><Link to="/crm">CRM</Link></li>
+            <li><Link to="/cer">CER</Link></li>
+            <li><Link to="/termo">Termo</Link></li>
+            <li><Link to="/contratti">Contratti</Link>
 
-      </div>
-    )
-  }
-
-  return (
-    <div className="container">
-      <header>
-        <img className="logo" src="/logo.png" alt="CER to USER" />
-        <h1>Benvenuto, {user.user_metadata?.full_name || user.email}</h1>
-      </header>
-
-      <div className="card">
-        <p>🌱 Dashboard iniziale (placeholder).</p>
-      </div>
 
       <p><button onClick={() => window.netlifyIdentity.logout()}>Esci</button></p>
     </div>
