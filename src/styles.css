@@ -1,8 +1,18 @@
-:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; }
-body { margin: 0; background: #f7fafc; color: #0b1320; }
-.container { max-width: 980px; margin: 40px auto; padding: 0 16px; }
-header { display: flex; align-items: center; gap: 16px; }
-.logo { width: 64px; height: 64px; object-fit: contain; }
-.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 20px; }
-button { padding: 10px 16px; border-radius: 10px; border: 1px solid #1a73e8; background: #1a73e8; color: #fff; cursor: pointer; }
+:root { color-scheme: light dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f3f6f9; color:#0b0f14; }
+a { color: inherit; }
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.nav { position: sticky; top: 0; display: flex; align-items: center; gap: 16px; padding: 10px 16px; border-bottom: 1px solid #d6dde6; background: #fff; }
+.brand { font-weight: 800; }
+.menu { display: flex; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.menu a { text-decoration: none; padding: 6px 8px; border-radius: 8px; }
+.menu a:hover { background: #eef2f6; }
+.auth { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.user { opacity: 0.8; }
+
+button { padding: 8px 12px; border: 1px solid #1f6feb; background: #2f81f7; color: #fff; border-radius: 10px; cursor: pointer; }
 button:hover { filter: brightness(0.95); }
+
+.content { padding: 18px; }
