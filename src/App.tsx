@@ -9,11 +9,7 @@ import Contratti from './pages/Contratti';
 import SuperAdmin from './pages/SuperAdmin';
 import './styles.css';
 
-declare global {
-  interface Window {
-    netlifyIdentity?: any;
-  }
-}
+declare global { interface Window { netlifyIdentity?: any } }
 
 export default function App() {
   const [user, setUser] = useState<any>(null);
@@ -23,14 +19,8 @@ export default function App() {
     if (!ni) return;
 
     const onInit = (u: any) => setUser(u);
-    const onLogin = (u: any) => {
-      setUser(u);
-      window.location.reload();
-    };
-    const onLogout = () => {
-      setUser(null);
-      window.location.reload();
-    };
+    const onLogin = (u: any) => { setUser(u); window.location.reload(); };
+    const onLogout = () => { setUser(null); window.location.reload(); };
 
     ni.on('init', onInit);
     ni.on('login', onLogin);
@@ -45,7 +35,7 @@ export default function App() {
   }, []);
 
   const openLogin = () => window.netlifyIdentity?.open('login');
-  const logout = () => window.netlifyIdentity?.logout();
+  const logout    = () => window.netlifyIdentity?.logout();
 
   const email = user?.email || user?.user_metadata?.email || '';
   const roles: string[] = user?.app_metadata?.roles ?? user?.roles ?? [];
@@ -56,7 +46,7 @@ export default function App() {
       <div className="app-shell">
         <nav className="nav">
           <div className="brand">CER to USER — Suite</div>
-          <ul>
+          <ul className="menu">
             <li><Link to="/">Hub</Link></li>
             <li><Link to="/crm">CRM</Link></li>
             <li><Link to="/cer">CER</Link></li>
@@ -64,10 +54,10 @@ export default function App() {
             <li><Link to="/contratti">Contratti</Link></li>
             <li><Link to="/superadmin">SuperAdmin</Link></li>
           </ul>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div className="auth">
             {user ? (
               <>
-                <span style={{ opacity: 0.8 }}>👤 {email || 'utente'}</span>
+                <span className="user">👤 {email || 'utente'}</span>
                 <button onClick={logout}>Esci</button>
               </>
             ) : (
