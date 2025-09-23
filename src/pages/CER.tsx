@@ -7,9 +7,9 @@ type CERItem = {
   trader?:string; created_at?:string;
 };
 
-const CER_FIXED = 15;           // fisso
-const PROS_MAX  = 50;           // max ai consumers
-const PROD_MAX  = 55;           // max produttore
+const CER_FIXED = 15;   // fisso
+const PROS_MAX  = 50;   // max consumers
+const PROD_MAX  = 55;   // max produttore
 
 export default function CER() {
   const [items, setItems] = useState<CERItem[]>([]);
@@ -24,25 +24,17 @@ export default function CER() {
 
   const n = (v:string) => v === '' ? null : Number(v);
 
-  // calcoli dinamici
   const calc = useMemo(() => {
     const prod = n(f.split_prod) ?? 0;
     const cer  = CER_FIXED;
-    // tutto il resto ai consumers (con tetto 50%)
     const rawPros = Math.max(0, 100 - cer - prod);
     const pros = Math.min(PROS_MAX, rawPros);
-    const eccedenza = Math.max(0, rawPros - PROS_MAX); // quota che eccede il tetto prosumer
-
+    const eccedenza = Math.max(0, rawPros - PROS_MAX);
     const sumRiparti = prod + cer + pros;
     const quota = n(f.quota_shared) ?? 0;
 
     const inRange = [prod, pros, cer, quota].every(x => x >= 0 && x <= 100);
-    const valid =
-      inRange &&
-      prod <= PROD_MAX &&
-      cer === CER_FIXED &&
-      eccedenza === 0 &&         // niente oltre 50% ai consumers
-      sumRiparti <= 100;
+    const valid = inRange && prod <= PROD_MAX && eccedenza === 0 && sumRiparti <= 100;
 
     const messages:string[] = [];
     if (prod > PROD_MAX) messages.push(`Produttore > ${PROD_MAX}%`);
@@ -73,7 +65,7 @@ export default function CER() {
         cabina: f.cabina || null,
         quota_shared: n(f.quota_shared),
         split_prod: calc.prod,
-        split_prosumer: calc.pros,           // calcolato qui
+        split_prosumer: calc.pros,           // calcolato
         split_cer_to_user: calc.cer,         // fisso 15
         trader: f.trader || null
       });
@@ -89,14 +81,12 @@ export default function CER() {
     <div className="grid" style={{gap:18}}>
       <section className="card">
         <h2 style={{marginTop:0}}>Crea CER</h2>
-
         <div style={{display:'flex', gap:10, alignItems:'center', flexWrap:'wrap', marginBottom:10}}>
           <span className="badge cyan">Resto → Consumers (auto)</span>
           <span className="badge green">Prod ≤ {PROD_MAX}%</span>
           <span className="badge yellow">CER→USER = {CER_FIXED}%</span>
           <span className="badge red">Consumers ≤ {PROS_MAX}%</span>
         </div>
-
         {err && <div className="alert error">{err}</div>}
         {ok  && <div className="alert ok">{ok}</div>}
 
@@ -114,11 +104,9 @@ export default function CER() {
           <label>Quota condivisa (%)
             <input type="number" step="0.01" value={f.quota_shared} onChange={e=>setF({...f, quota_shared:e.target.value})}/>
           </label>
-
           <label>Produttore (%)
             <input type="number" step="0.01" value={f.split_prod} onChange={e=>setF({...f, split_prod:e.target.value})}/>
           </label>
-
           <label>Consumers / Prosumer (%)
             <input value={calc.pros.toFixed(2)} readOnly />
           </label>
@@ -140,7 +128,6 @@ export default function CER() {
           <h2 style={{margin:0}}>CER esistenti</h2>
           <span className="badge cyan">{items.length} record</span>
         </div>
-
         <div style={{overflowX:'auto', marginTop:12}}>
           <table className="table">
             <thead>
