@@ -1,41 +1,42 @@
 // netlify/functions/customers-create.js
 const { withClient, ensureSchema, success, failure } = require('./_db.js');
 
+function uuid() {
+  return (globalThis.crypto && globalThis.crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
 exports.handler = async (event) => {
   try {
-    const payload = JSON.parse(event.body || '{}');
-    let { type, name, email, piva, cf } = payload;
+    const body = JSON.parse(event.body || '{}');
 
-    if (!type || !name) return failure('Missing required fields: type, name', 400);
-    if (!['privato', 'piva'].includes(type)) return failure('Invalid type', 400);
+    const type = (body.type || '').toLowerCase();   // 'privato' | 'piva'
+    const name = (body.name || '').trim();
+    const email = (body.email || null);
 
-    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
-      return failure('Email non valida', 400);
-    }
+    if (!name) return failure('Nome / Ragione sociale obbligatorio', 400);
+    if (!['privato','piva'].includes(type)) return failure('Tipo cliente non valido', 400);
 
+    let piva = null, cf = null;
     if (type === 'piva') {
-      if (!piva || !/^[0-9A-Z]{11}$/i.test(String(piva).trim())) {
-        return failure('P.IVA non valida (11 caratteri)', 400);
-      }
-      cf = null; // non salvo CF per aziende
+      piva = (body.piva || '').trim();
+      if (!piva) return failure('P.IVA obbligatoria per aziende', 400);
     } else {
-      if (!cf || !/^[A-Z0-9]{16}$/i.test(String(cf).trim())) {
-        return failure('Codice Fiscale non valido (16 caratteri)', 400);
-      }
-      piva = null; // non salvo P.IVA per privati
+      cf = (body.cf || '').trim();
+      if (!cf) return failure('Codice Fiscale obbligatorio per privati', 400);
     }
-
-    const id = (globalThis.crypto && globalThis.crypto.randomUUID) ? globalThis.crypto.randomUUID() : String(Date.now());
 
     return await withClient(async (client) => {
       await ensureSchema(client);
+      const id = uuid();
       await client.query(
-        'INSERT INTO customers (id, type, name, email, piva, cf) VALUES ($1,$2,$3,$4,$5,$6)',
-        [id, type, name, email || null, piva || null, cf || null]
+        `INSERT INTO customers (id, type, name, email, piva, cf) VALUES ($1,$2,$3,$4,$5,$6)`,
+        [id, type, name, email, piva, cf]
       );
       return success({ id });
     });
   } catch (e) {
-    return failure(e.message);
+    return failure(e.message || String(e), 500);
   }
 };
