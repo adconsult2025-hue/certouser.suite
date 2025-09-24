@@ -1,7 +1,6 @@
-// netlify/functions/customers-list.js
 const { withClient, ensureSchema, success, failure } = require('./_db.js');
 
-exports.handler = async () => {
+module.exports.handler = async () => {
   try {
     return await withClient(async (client) => {
       await ensureSchema(client);
