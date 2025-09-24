@@ -44,32 +44,14 @@ async function ensureSchema(client) {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
-    CREATE TABLE IF NOT EXISTS customer_files (
-      id TEXT PRIMARY KEY,
-      customer_id TEXT NOT NULL,
-      filename TEXT NOT NULL,
-      mime TEXT,
-      size_bytes INTEGER,
-      content BYTEA,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-    CREATE INDEX IF NOT EXISTS idx_customer_files_customer_id ON customer_files(customer_id);
-
-    CREATE TABLE IF NOT EXISTS templates (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      type TEXT NOT NULL,
-      content TEXT NOT NULL,
-      encoding TEXT DEFAULT 'base64',
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    -- NUOVO: membri CER
     CREATE TABLE IF NOT EXISTS cer_members (
       id TEXT PRIMARY KEY,
       cer_id TEXT NOT NULL,
       customer_id TEXT NOT NULL,
-      role TEXT NOT NULL,  -- 'producer' | 'consumer'
+      role TEXT NOT NULL,     -- 'producer' | 'consumer'
+      weight NUMERIC,         -- parametro inserito dall'utente (>=0)
+      group_share NUMERIC,    -- % sul 100% del gruppo (normalizzata)
+      abs_share NUMERIC,      -- % sull'intera CER (group_share * split_role / 100)
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_cer_members_cer ON cer_members(cer_id);
@@ -78,19 +60,10 @@ async function ensureSchema(client) {
 }
 
 function success(body, statusCode = 200) {
-  return {
-    statusCode,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  };
+  return { statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
-
 function failure(message, statusCode = 500, extra = {}) {
-  return {
-    statusCode,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ error: message, ...extra })
-  };
+  return { statusCode, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: message, ...extra }) };
 }
 
 module.exports = { withClient, ensureSchema, success, failure };
