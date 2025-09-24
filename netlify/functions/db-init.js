@@ -1,12 +1,13 @@
+// CommonJS, nessun "request", nessun searchParams
 const { withClient, ensureSchema, success, failure } = require('./_db.js');
 
-exports.handler = async () => {
+module.exports.handler = async () => {
   try {
-    await withClient(async (client) => {
+    return await withClient(async (client) => {
       await ensureSchema(client);
+      return success({ ok: true });
     });
-    return success({ ok: true });
   } catch (e) {
-    return failure(e.message);
+    return failure(e.message || String(e), 500);
   }
 };
