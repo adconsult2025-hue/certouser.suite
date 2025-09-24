@@ -9,11 +9,11 @@ exports.handler = async () => {
         SELECT id, type, name, email, piva, cf, created_at
         FROM customers
         ORDER BY created_at DESC
-        LIMIT 200
+        LIMIT 500
       `);
       return success({ items: res.rows });
     });
   } catch (e) {
-    return failure(e.message);
+    return failure(e.message || String(e), 500);
   }
 };
