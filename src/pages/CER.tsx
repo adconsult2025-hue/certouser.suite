@@ -6,25 +6,23 @@ type CERItem = {
   quota_shared?:number; split_prod?:number; split_prosumer?:number; split_cer_to_user?:number;
   trader?:string; created_at?:string;
 };
-
 type Customer = { id:string; name:string; type:'privato'|'piva' };
 
-const CER_FIXED = 15;   // fisso
-const PROS_MAX  = 50;   // max consumers
-const PROD_MAX  = 55;   // max produttore
+const CER_FIXED = 15;
+const PROS_MAX  = 50;
+const PROD_MAX  = 55;
+
+type MemberSel = { customer_id:string; role:'producer'|'consumer'; weight:number };
 
 export default function CER() {
   const [items, setItems] = useState<CERItem[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [members, setMembers] = useState<{customer_id:string; role:'producer'|'consumer'}[]>([]);
+  const [members, setMembers] = useState<MemberSel[]>([]);
   const [busy, setBusy] = useState(false);
   const [err,  setErr]  = useState<string>('');
   const [ok,   setOk]   = useState<string>('');
 
-  const [f, setF] = useState({
-    name:'', cabina:'', quota_shared:'', split_prod:'', split_cer_to_user:String(CER_FIXED), trader:''
-  });
-
+  const [f, setF] = useState({ name:'', cabina:'', quota_shared:'', split_prod:'', split_cer_to_user:String(CER_FIXED), trader:'' });
   const n = (v:string) => v === '' ? null : Number(v);
 
   const calc = useMemo(() => {
@@ -36,20 +34,39 @@ export default function CER() {
     const sumRiparti = prod + cer + pros;
     const quota = n(f.quota_shared) ?? 0;
     const inRange = [prod, pros, cer, quota].every(x => x >= 0 && x <= 100);
-    const valid = inRange && prod <= PROD_MAX && eccedenza === 0 && sumRiparti <= 100;
+    const validSplits = inRange && prod <= PROD_MAX && eccedenza === 0 && sumRiparti <= 100;
 
+    // normalizzazione gruppi
+    const sumW = members.reduce((acc, m) => { acc[m.role] += m.weight || 0; return acc; }, { producer:0, consumer:0 } as any);
+    const groupShares = members.map(m => ({
+      id: m.customer_id,
+      role: m.role,
+      weight: m.weight,
+      groupShare: (sumW[m.role] > 0 ? (m.weight / sumW[m.role]) * 100 : 0),
+      absShare: 0, // calcolata sotto
+    }));
+    for (const gs of groupShares) {
+      const roleSplit = gs.role === 'producer' ? prod : pros;
+      (gs as any).absShare = gs.groupShare * roleSplit / 100;
+    }
+
+    // avvisi
     const messages:string[] = [];
-    if (prod > PROD_MAX) messages.push(`Produttore > ${PROD_MAX}%`);
-    if (eccedenza > 0) messages.push(`Resto ai Consumers supera ${PROS_MAX}%: riduci Produttore`);
-    if (sumRiparti > 100) messages.push('Somma riparti oltre 100%');
+    if (!validSplits) {
+      if (prod > PROD_MAX) messages.push(`Produttore > ${PROD_MAX}%`);
+      if (eccedenza > 0) messages.push(`Resto ai Consumers supera ${PROS_MAX}%: riduci Produttore`);
+      if (sumRiparti > 100) messages.push('Somma riparti oltre 100%');
+    } else {
+      if (prod > 0 && sumW.producer === 0) messages.push('Pesi produttori tutti a 0');
+      if (pros > 0 && sumW.consumer === 0) messages.push('Pesi consumer tutti a 0');
+    }
 
-    return { prod, pros, cer, eccedenza, sumRiparti, valid, messages };
-  }, [f]);
+    const valid = validSplits && !(prod > 0 && sumW.producer === 0) && !(pros > 0 && sumW.consumer === 0);
 
-  const loadCER = async () => {
-    const data = await apiGet('cer-list');
-    setItems(data.items || []);
-  };
+    return { prod, pros, cer, sumW, groupShares, valid, messages };
+  }, [f, members]);
+
+  const loadCER = async () => { const data = await apiGet('cer-list'); setItems(data.items || []); };
   const loadCustomers = async () => {
     const data = await apiGet('customers-list');
     setCustomers((data.items || []).map((x:any)=>({ id:x.id, name:x.name, type:x.type })));
@@ -59,25 +76,24 @@ export default function CER() {
     (async () => {
       setBusy(true); setErr('');
       try { await Promise.all([loadCER(), loadCustomers()]); }
-      catch { setErr('Errore nel caricamento'); }
+      catch (e:any) { setErr(e?.message || 'Errore nel caricamento'); }
       finally { setBusy(false); }
     })();
   }, []);
 
-  const toggleMember = (c: Customer, role:'producer'|'consumer') => {
+  const upsertMember = (id:string, role:'producer'|'consumer', weight:number) => {
     setMembers(prev => {
-      const i = prev.findIndex(m => m.customer_id === c.id);
-      if (i === -1) return [...prev, { customer_id: c.id, role }];
-      const copy = [...prev]; copy[i] = { customer_id: c.id, role }; return copy;
+      const i = prev.findIndex(m => m.customer_id === id);
+      if (i === -1) return [...prev, { customer_id:id, role, weight }];
+      const copy = [...prev]; copy[i] = { customer_id:id, role, weight }; return copy;
     });
   };
   const removeMember = (id:string) => setMembers(prev => prev.filter(m => m.customer_id !== id));
 
   const submit = async (e:React.FormEvent) => {
     e.preventDefault();
-    if (!calc.valid) { setErr(calc.messages[0] || 'Verifica i vincoli'); return; }
+    if (!calc.valid) { setErr(calc.messages[0] || 'Verifica i vincoli e i pesi'); return; }
     if (!f.name.trim()) { setErr('Inserisci un nome CER'); return; }
-
     setBusy(true); setErr(''); setOk('');
     try {
       await apiPost('cer-create', {
@@ -85,8 +101,8 @@ export default function CER() {
         cabina: f.cabina || null,
         quota_shared: n(f.quota_shared),
         split_prod: calc.prod,
-        split_prosumer: calc.pros,           // calcolato client (server ricalcola comunque)
-        split_cer_to_user: calc.cer,         // 15 fisso
+        split_prosumer: calc.pros,            // server ricalcola comunque
+        split_cer_to_user: calc.cer,          // 15 fisso
         trader: f.trader || null,
         members
       });
@@ -148,9 +164,9 @@ export default function CER() {
         </form>
       </section>
 
-      {/* Selezione membri dal CRM */}
+      {/* Membri + pesi */}
       <section className="card">
-        <h3 style={{marginTop:0}}>Membri (CRM) da associare</h3>
+        <h3 style={{marginTop:0}}>Membri (da CRM) con ruolo e peso</h3>
         <div className="grid cols-3">
           {customers.map(c => {
             const sel = members.find(m => m.customer_id === c.id);
@@ -164,15 +180,37 @@ export default function CER() {
                   <button
                     type="button"
                     className={sel?.role === 'producer' ? '' : 'ghost'}
-                    onClick={()=>toggleMember(c, 'producer')}
+                    onClick={()=>upsertMember(c.id, 'producer', sel?.weight ?? 0)}
                   >Produttore</button>
                   <button
                     type="button"
                     className={sel?.role === 'consumer' ? 'secondary' : 'ghost'}
-                    onClick={()=>toggleMember(c, 'consumer')}
+                    onClick={()=>upsertMember(c.id, 'consumer', sel?.weight ?? 0)}
                   >Consumer</button>
                   {sel && <button type="button" className="danger" onClick={()=>removeMember(c.id)}>Rimuovi</button>}
                 </div>
+                {sel && (
+                  <div style={{marginTop:10}}>
+                    <label>Peso (>=0)
+                      <input type="number" step="0.001" value={sel.weight}
+                        onChange={e=>upsertMember(c.id, sel.role, Number(e.target.value))}
+                      />
+                    </label>
+                    {/* anteprima normalizzata & quota assoluta */}
+                    <div style={{marginTop:6, color:'var(--sub)'}}>
+                      {(() => {
+                        const gs = (calc.groupShares.find(g => g.id === c.id) as any);
+                        const roleSplit = sel.role === 'producer' ? calc.prod : calc.pros;
+                        return (
+                          <div>
+                            <div>Quota gruppo {sel.role === 'producer' ? 'Produttori' : 'Consumers'}: <b>{(gs?.groupShare ?? 0).toFixed(2)}%</b> (pesi normalizzati)</div>
+                            <div>Quota assoluta (su CER): <b>{(gs?.absShare ?? 0).toFixed(2)}%</b> (× {roleSplit.toFixed(2)}%)</div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -180,6 +218,7 @@ export default function CER() {
         </div>
       </section>
 
+      {/* Elenco CER */}
       <section className="card">
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
           <h2 style={{margin:0}}>CER esistenti</h2>
@@ -199,8 +238,8 @@ export default function CER() {
                   <td>{c.cabina || '—'}</td>
                   <td>{c.quota_shared ?? '—'}%</td>
                   <td>{c.split_prod ?? '—'}%</td>
-                  <td><span className="badge green">{c.split_prosumer ?? '—'}%</span></td>
-                  <td><span className="badge yellow">{c.split_cer_to_user ?? '—'}%</span></td>
+                  <td>{c.split_prosumer ?? '—'}%</td>
+                  <td>{c.split_cer_to_user ?? '—'}%</td>
                   <td>{c.trader || '—'}</td>
                   <td>{c.created_at ? new Date(c.created_at).toLocaleString() : '—'}</td>
                 </tr>
