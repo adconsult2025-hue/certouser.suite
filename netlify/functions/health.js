@@ -1,6 +1,6 @@
-exports.handler = async function(event, context) {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ status: "ok" })
-  };
-};
+// netlify/functions/health.js
+module.exports.handler = async () => ({
+  statusCode: 200,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ ok: true, ts: Date.now() })
+});
