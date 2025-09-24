@@ -43,14 +43,13 @@ export default function CER() {
       role: m.role,
       weight: m.weight,
       groupShare: (sumW[m.role] > 0 ? (m.weight / sumW[m.role]) * 100 : 0),
-      absShare: 0, // calcolata sotto
+      absShare: 0,
     }));
     for (const gs of groupShares) {
       const roleSplit = gs.role === 'producer' ? prod : pros;
       (gs as any).absShare = gs.groupShare * roleSplit / 100;
     }
 
-    // avvisi
     const messages:string[] = [];
     if (!validSplits) {
       if (prod > PROD_MAX) messages.push(`Produttore > ${PROD_MAX}%`);
@@ -101,8 +100,8 @@ export default function CER() {
         cabina: f.cabina || null,
         quota_shared: n(f.quota_shared),
         split_prod: calc.prod,
-        split_prosumer: calc.pros,            // server ricalcola comunque
-        split_cer_to_user: calc.cer,          // 15 fisso
+        split_prosumer: calc.pros,
+        split_cer_to_user: calc.cer,
         trader: f.trader || null,
         members
       });
@@ -191,20 +190,26 @@ export default function CER() {
                 </div>
                 {sel && (
                   <div style={{marginTop:10}}>
-                    <label>Peso (>=0)
-                      <input type="number" step="0.001" value={sel.weight}
+                    <label>Peso (&ge; 0)
+                      <input
+                        type="number" step="0.001" value={sel.weight}
                         onChange={e=>upsertMember(c.id, sel.role, Number(e.target.value))}
                       />
                     </label>
-                    {/* anteprima normalizzata & quota assoluta */}
                     <div style={{marginTop:6, color:'var(--sub)'}}>
                       {(() => {
+                        // anteprima normalizzata & quota assoluta
+                        // (si basano su calc.groupShares)
                         const gs = (calc.groupShares.find(g => g.id === c.id) as any);
                         const roleSplit = sel.role === 'producer' ? calc.prod : calc.pros;
                         return (
                           <div>
-                            <div>Quota gruppo {sel.role === 'producer' ? 'Produttori' : 'Consumers'}: <b>{(gs?.groupShare ?? 0).toFixed(2)}%</b> (pesi normalizzati)</div>
-                            <div>Quota assoluta (su CER): <b>{(gs?.absShare ?? 0).toFixed(2)}%</b> (× {roleSplit.toFixed(2)}%)</div>
+                            <div>Quota gruppo {sel.role === 'producer' ? 'Produttori' : 'Consumers'}:
+                              {' '}<b>{(gs?.groupShare ?? 0).toFixed(2)}%</b>
+                            </div>
+                            <div>Quota assoluta (su CER):
+                              {' '}<b>{(gs?.absShare ?? 0).toFixed(2)}%</b> (× {roleSplit.toFixed(2)}%)
+                            </div>
                           </div>
                         );
                       })()}
