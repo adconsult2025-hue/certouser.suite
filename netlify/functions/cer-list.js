@@ -1,6 +1,10 @@
 // netlify/functions/cer-list.js
-const db = require('./_db.js');
-const { withClient, ensureSchema, success, failure } = db;
+const { withClient, ensureSchema, success, failure } = require('./_db.js');
+
+// Alias locali: anche se da qualche parte resta scritto failure2/success2
+// in questa function NON potranno essere undefined.
+const failure2 = failure;
+const success2 = success;
 
 module.exports.handler = async () => {
   try {
@@ -14,9 +18,11 @@ module.exports.handler = async () => {
         LIMIT 200
       `);
 
+      // usa sempre success
       return success({ items: r.rows });
     });
   } catch (e) {
+    // e sempre failure qui
     return failure(e.message || String(e), 500);
   }
 };
