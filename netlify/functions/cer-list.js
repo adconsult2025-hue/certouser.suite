@@ -1,9 +1,19 @@
 // netlify/functions/cer-list.js
-const { withClient, ensureSchema, success, failure } = require('./_db.js');
+// Versione blindata: NON usa success/failure da _db per evitare qualsiasi refuso.
+// Manteniamo solo DB helpers.
+const { withClient, ensureSchema } = require('./_db.js');
 
-// alias locali (a prova di refusi residui)
-const failure2 = failure;
-const success2 = success;
+// Risposte locali (no dipendenze esterne)
+const ok = (body, code = 200) => ({
+  statusCode: code,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+});
+const ko = (msg, code = 500) => ({
+  statusCode: code,
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ error: msg }),
+});
 
 module.exports.handler = async () => {
   try {
@@ -17,9 +27,9 @@ module.exports.handler = async () => {
         LIMIT 200
       `);
 
-      return success({ items: r.rows });
+      return ok({ items: r.rows, endpoint: 'cer-list' });
     });
   } catch (e) {
-    return failure(e.message || String(e), 500);
+    return ko(e.message || String(e), 500);
   }
 };
