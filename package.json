@@ -12,7 +12,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.0",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "@netlify/blobs": "^6.3.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",
