@@ -5,6 +5,7 @@ module.exports.handler = async (event) => {
     const q = (event.queryStringParameters && event.queryStringParameters.q) || '';
     return await withClient(async (client) => {
       await ensureSchema(client);
+
       let res;
       if (q) {
         res = await client.query(`
@@ -25,6 +26,7 @@ module.exports.handler = async (event) => {
           LIMIT 500
         `);
       }
+
       return success({ items: res.rows });
     });
   } catch (e) {
