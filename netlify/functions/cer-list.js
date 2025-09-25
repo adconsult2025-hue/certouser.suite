@@ -1,8 +1,8 @@
 // netlify/functions/cer-list.js
 const { withClient, ensureSchema, success, failure } = require('./_db.js');
 
-// Alias locali: anche se da qualche parte resta scritto failure2/success2
-// in questa function NON potranno essere undefined.
+// Alias locali: anche se restasse scritto failure2/success2 da qualche parte,
+// qui NON potranno essere undefined.
 const failure2 = failure;
 const success2 = success;
 
@@ -18,11 +18,11 @@ module.exports.handler = async () => {
         LIMIT 200
       `);
 
-      // usa sempre success
+      // Risposta standard
       return success({ items: r.rows });
     });
   } catch (e) {
-    // e sempre failure qui
+    // Usare sempre failure; alias sopra solo per compatibilità
     return failure(e.message || String(e), 500);
   }
 };
