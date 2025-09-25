@@ -145,7 +145,9 @@ module.exports = {
   ensureSchema,
   success,
   failure,
-  // alias "anti-errore" per eventuali vecchie chiamate
+  // alias anti-refuso (qualsiasi vecchia chiamata non romperà)
   success2: success,
   failure2: failure,
+  withClient2: withClient,
+  ensureSchema2: ensureSchema,
 };
