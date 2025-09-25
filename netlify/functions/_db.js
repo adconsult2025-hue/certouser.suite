@@ -87,14 +87,14 @@ async function ensureSchema(client) {
 function success(body, code=200){ return { statusCode: code, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }; }
 function failure(msg, code=500, extra={}){ return { statusCode: code, headers:{'Content-Type':'application/json'}, body: JSON.stringify({ error: msg, ...extra }) }; }
 
-// in coda a _db.js
 module.exports = {
   withClient,
   ensureSchema,
   success,
   failure,
-  // alias "a prova di refuso"
+  // alias robusti (se qualche file chiama ancora success2/failure2)
   success2: success,
   failure2: failure,
 };
+
 
