@@ -3,6 +3,12 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 import Hub from './pages/Hub';
 import CRM from './pages/CRM';
+// ...
+<Routes>
+  {/* altre rotte */}
+  <Route path="/crm" element={<CRM/>} />
+</Routes>
+
 import CER from './pages/CER';
 import Termo from './pages/Termo';
 import Contratti from './pages/Contratti';
