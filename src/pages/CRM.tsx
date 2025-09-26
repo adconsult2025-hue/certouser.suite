@@ -7,6 +7,7 @@ type Customer = {
   phone?:string; mobile?:string; whatsapp?:string;
   status?: 'lead'|'prospect'|'client'|'suspended'|null;
   score?: number|null; next_action?: string|null; owner?: string|null;
+  tags?: string[]|null; last_contact_at?: string|null;
 };
 type FileRow = { id:string; name:string; mime?:string; size?:number; url?:string; created_at?:string };
 

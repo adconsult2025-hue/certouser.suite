@@ -9,7 +9,7 @@ module.exports.handler = async (event) => {
       let res;
       if (q) {
         res = await client.query(`
-          SELECT id, type, name, email, piva, cf, status, score, owner, next_action, created_at
+          SELECT customers.*
           FROM customers
           WHERE lower(name) LIKE lower($1)
              OR coalesce(email,'') ILIKE $1
@@ -20,7 +20,7 @@ module.exports.handler = async (event) => {
         `, [`%${q}%`]);
       } else {
         res = await client.query(`
-          SELECT id, type, name, email, piva, cf, status, score, owner, next_action, created_at
+          SELECT customers.*
           FROM customers
           ORDER BY created_at DESC
           LIMIT 500
