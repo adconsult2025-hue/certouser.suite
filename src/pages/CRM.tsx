@@ -1,243 +1,198 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { apiGet, apiPost } from '../lib/api';
+import React, { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 type Customer = {
-  id: string; type: 'privato'|'piva'; name: string; email?:string;
-  piva?:string; cf?:string; created_at?:string;
-  phone?:string; mobile?:string; whatsapp?:string;
-  status?: 'lead'|'prospect'|'client'|'suspended'|null;
-  score?: number|null; next_action?: string|null; owner?: string|null;
+  id: string;
+  nome: string;
+  email: string;
+  telefono: string;
+  pod: string;
+  cabina: string;
+  hasDoc: boolean;
+  hasTessera: boolean;
+  hasBolletta: boolean;
+  hasPrivacy: boolean;
 };
-type FileRow = { id:string; name:string; mime?:string; size?:number; url?:string; created_at?:string };
 
-export default function CRM(){
-  const [list,setList]=useState<Customer[]>([]);
-  const [q,setQ]=useState('');
-  const [busy,setBusy]=useState(false);
-  const [err,setErr]=useState<string>('');
-  const [f,setF]=useState<{id?:string;type:'privato'|'piva';name:string;email:string;piva:string;cf:string;phone:string;mobile:string;whatsapp:string;status:any;score:any;next_action:string;owner:string}>({
-    type:'privato', name:'', email:'', piva:'', cf:'', phone:'', mobile:'', whatsapp:'', status:'lead', score:'', next_action:'', owner:''
-  });
-  const [files,setFiles]=useState<FileRow[]>([]);
+const STORAGE_KEY = "crm_customers_v1";
 
-  const load = async (query='')=>{
-    setBusy(true); setErr('');
-    try{
-      const r=await apiGet('customers-list', query?{q:query}:{});
-      setList(r.items||[]);
-    }catch(e:any){setErr(e.message)}
-    finally{setBusy(false)}
-  };
+function loadCustomers(): Customer[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
-  const loadFiles = async (id:string)=>{
-    const u = new URL('/.netlify/functions/customer-files-list', window.location.origin);
-    u.searchParams.set('customer_id', id);
-    const res = await fetch(u.toString());
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || res.statusText);
-    setFiles(data.items||[]);
-  };
+function saveCustomers(data: Customer[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-  useEffect(()=>{ load(); },[]);
+export default function CRM() {
+  const [customers, setCustomers] = useState<Customer[]>(() => loadCustomers());
+  const empty: Customer = useMemo(
+    () => ({
+      id: "",
+      nome: "",
+      email: "",
+      telefono: "",
+      pod: "",
+      cabina: "",
+      hasDoc: false,
+      hasTessera: false,
+      hasBolletta: false,
+      hasPrivacy: false,
+    }),
+    []
+  );
+  const [form, setForm] = useState<Customer>(empty);
 
-  const reset = ()=>{
-    setF({type:'privato',name:'',email:'',piva:'',cf:'', phone:'',mobile:'',whatsapp:'', status:'lead', score:'', next_action:'', owner:''});
-    setFiles([]);
-  };
+  function onPick(c: Customer) {
+    setForm({ ...c, id: c.id });
+  }
 
-  const edit = async (c:Customer)=>{
-    setF({
-      id:c.id, type:c.type, name:c.name, email:c.email||'',
-      piva:c.piva||'', cf:c.cf||'',
-      phone:c.phone||'', mobile:c.mobile||'', whatsapp:c.whatsapp||'',
-      status:c.status||'lead', score: (c.score??''),
-      next_action:c.next_action||'', owner:c.owner||''
-    });
-    await loadFiles(c.id);
-  };
+  function onNew() {
+    setForm(empty);
+  }
 
-  const save = async ()=>{
-    setBusy(true); setErr('');
-    try{
-      const body:any = {...f};
-      if(f.id){
-        await apiPost('customers-update', body);
-      }else{
-        const r = await apiPost('customers-create', body);
-        body.id = r.id;
-      }
-      await apiPost('customers-set-status', {
-        id: body.id, status: body.status, score: Number(body.score),
-        next_action: body.next_action, owner: body.owner, phone: body.phone, mobile: body.mobile, whatsapp: body.whatsapp
-      }).catch(()=>{});
-      reset(); await load(q);
-    }catch(e:any){ setErr(e.message) }
-    finally{ setBusy(false) }
-  };
+  function onChange<K extends keyof Customer>(key: K, val: Customer[K]) {
+    setForm((f) => ({ ...f, [key]: val }));
+  }
 
-  const del = async (id:string)=>{
-    if(!confirm('Eliminare il cliente?')) return;
-    setBusy(true); setErr('');
-    try{ await apiPost('customers-delete',{id}); reset(); await load(q); }
-    catch(e:any){ setErr(e.message) } finally{ setBusy(false); }
-  };
+  function onFileChange(key: keyof Customer, files: FileList | null) {
+    // usiamo solo la presenza file -> boolean
+    onChange(key, !!(files && files.length) as any);
+  }
 
-  const onUpload = async (file: File)=>{
-    if(!f.id){ alert('Salva il cliente prima di allegare file.'); return; }
-    const u = new URL('/.netlify/functions/customer-files-put', window.location.origin);
-    u.searchParams.set('customer_id', f.id);
-    u.searchParams.set('name', file.name);
-    const res = await fetch(u.toString(), {
-      method: 'POST',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: await file.arrayBuffer()
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || res.statusText);
-    await loadFiles(f.id);
-  };
+  function onSave() {
+    const id = form.id || String(Date.now());
+    const record: Customer = { ...form, id };
+    const next = [...customers];
+    const idx = next.findIndex((x) => String(x.id) === String(id));
+    if (idx >= 0) next[idx] = record;
+    else next.push(record);
+    setCustomers(next);
+    saveCustomers(next);
+    setForm(record);
+  }
 
-  const removeFile = async (id: string)=>{
-    const res = await fetch('/.netlify/functions/customer-files-delete?id='+encodeURIComponent(id), { method:'POST' });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || res.statusText);
-    if(f.id) await loadFiles(f.id);
-  };
-
-  const statusColor = useMemo(()=>{
-    switch(f.status){
-      case 'client': return 'var(--ok)';
-      case 'prospect': return 'var(--warn)';
-      case 'suspended': return 'var(--danger)';
-      default: return 'var(--muted)';
-    }
-  },[f.status]);
+  function openGSE() {
+    window.open(
+      "https://www.gse.it/servizi-per-te/autoconsumo/mappa-interattiva-delle-cabine-primarie",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
 
   return (
-    <div className="grid" style={{gap:18}}>
-      <section className="card">
-        <h2>Nuovo / Modifica cliente</h2>
-        {err && <div className="alert error">{err}</div>}
-        <div className="grid cols-3">
-          <label>Tipo
-            <select value={f.type} onChange={e=>setF({...f, type:e.target.value as any})}>
-              <option value="privato">Privato</option>
-              <option value="piva">Azienda / P.IVA</option>
-            </select>
-          </label>
-          <label>Nome / Ragione sociale
-            <input value={f.name} onChange={e=>setF({...f, name:e.target.value})}/>
-          </label>
-          <label>Email
-            <input value={f.email} onChange={e=>setF({...f, email:e.target.value})}/>
-          </label>
+    <div className="container">
+      <nav className="main-nav">
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li className="active"><Link to="/crm">Clienti</Link></li>
+          <li><a href="/simulatore.html">Simulatore</a></li>
+        </ul>
+      </nav>
 
-          {f.type==='piva' ? (
-            <label>P.IVA
-              <input value={f.piva} onChange={e=>setF({...f, piva:e.target.value})}/>
-            </label>
-          ) : (
-            <label>Codice Fiscale (16)
-              <input value={f.cf} onChange={e=>setF({...f, cf:e.target.value})}/>
-            </label>
-          )}
-
-          <label>Telefono
-            <input value={f.phone} onChange={e=>setF({...f, phone:e.target.value})}/>
-          </label>
-          <label>Mobile
-            <input value={f.mobile} onChange={e=>setF({...f, mobile:e.target.value})}/>
-          </label>
-          <label>WhatsApp
-            <input value={f.whatsapp} onChange={e=>setF({...f, whatsapp:e.target.value})}/>
-          </label>
-
-          <label>Stato (semaforo)
-            <div style={{display:'flex',gap:8,alignItems:'center'}}>
-              <span style={{width:12,height:12,borderRadius:6,background:statusColor,display:'inline-block'}}/>
-              <select value={f.status} onChange={e=>setF({...f, status:e.target.value})}>
-                <option value="lead">Lead</option>
-                <option value="prospect">Prospect</option>
-                <option value="client">Client</option>
-                <option value="suspended">Sospeso</option>
-              </select>
-            </div>
-          </label>
-          <label>Score (0-100)
-            <input type="number" value={f.score} onChange={e=>setF({...f, score:e.target.value})}/>
-          </label>
-          <label>Owner
-            <input value={f.owner} onChange={e=>setF({...f, owner:e.target.value})}/>
-          </label>
-          <label style={{gridColumn:'1/-1'}}>Prossima azione
-            <input value={f.next_action} onChange={e=>setF({...f, next_action:e.target.value})}/>
-          </label>
-
-          <div style={{gridColumn:'1/-1', display:'flex', gap:10, flexWrap:'wrap'}}>
-            <button onClick={save} disabled={busy}>{f.id?'Salva':'Aggiungi'}</button>
-            <button className="ghost" onClick={reset}>Reset</button>
-            {f.id && <button className="danger" onClick={()=>del(f.id!)}>Elimina</button>}
-            {/* Pulsanti contatto */}
-            {f.email && <a className="ghost" href={`mailto:${f.email}`}>Email</a>}
-            {f.phone && <a className="ghost" href={`tel:${f.phone}`}>Chiama</a>}
-            {f.whatsapp && <a className="ghost" target="_blank" rel="noreferrer"
-              href={`https://wa.me/${f.whatsapp.replace(/\D/g,'')}`}>WhatsApp</a>}
-          </div>
+      <header className="page-header">
+        <h1>Gestione Clienti</h1>
+        <div className="crm-controls">
+          <button className="btn primary" onClick={onNew}>Nuovo Cliente</button>
+          <button className="btn" onClick={openGSE}>Verifica Cabina (GSE)</button>
         </div>
+      </header>
 
-        {/* ALLEGATI */}
-        <div style={{marginTop:16}}>
-          <h3>Allegati</h3>
-          <input type="file" onChange={e=>e.target.files && onUpload(e.target.files[0])}/>
-          <div style={{marginTop:10, overflowX:'auto'}}>
-            <table className="table">
-              <thead><tr><th>Nome</th><th>Tipo</th><th>Size</th><th>Caricato</th><th/></tr></thead>
-              <tbody>
-                {files.map(fl=>(
-                  <tr key={fl.id}>
-                    <td>{fl.url ? <a href={fl.url} target="_blank" rel="noreferrer">{fl.name}</a> : fl.name}</td>
-                    <td>{fl.mime||'–'}</td>
-                    <td>{fl.size ? `${(fl.size/1024).toFixed(1)} KB` : '–'}</td>
-                    <td>{fl.created_at? new Date(fl.created_at).toLocaleString() : '–'}</td>
-                    <td><button className="danger" onClick={()=>removeFile(fl.id)}>Elimina</button></td>
-                  </tr>
-                ))}
-                {!files.length && <tr><td colSpan={5} style={{color:'var(--sub)'}}>Nessun file.</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section className="card">
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <h2>Clienti</h2>
-          <div>
-            <input placeholder="Cerca..." value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==='Enter'&&load(q)} />
-            <button className="ghost" onClick={()=>load(q)}>Cerca</button>
-          </div>
-        </div>
-        <div style={{overflowX:'auto', marginTop:10}}>
+      <section className="grid-2">
+        {/* Lista */}
+        <div className="card">
+          <h2>Elenco</h2>
           <table className="table">
-            <thead><tr><th>Nome</th><th>Tipo</th><th>Email</th><th>CF/P.IVA</th><th>Stato</th><th>Score</th><th>Creato</th><th/></tr></thead>
+            <thead>
+              <tr>
+                <th>Nome</th><th>Email</th><th>Telefono</th><th>POD</th><th>Cabina</th><th className="a-center">Allegati</th><th></th>
+              </tr>
+            </thead>
             <tbody>
-              {list.map(c=>(
+              {customers.map((c) => (
                 <tr key={c.id}>
-                  <td>{c.name}</td>
-                  <td>{c.type}</td>
-                  <td>{c.email||'—'}</td>
-                  <td>{c.type==='piva'?(c.piva||'—'):(c.cf||'—')}</td>
-                  <td>{c.status||'—'}</td>
-                  <td>{c.score ?? '—'}</td>
-                  <td>{c.created_at?new Date(c.created_at).toLocaleString():'—'}</td>
-                  <td style={{whiteSpace:'nowrap'}}>
-                    <button className="ghost" onClick={()=>edit(c)}>Apri</button>
+                  <td>{c.nome}</td>
+                  <td>{c.email}</td>
+                  <td>{c.telefono}</td>
+                  <td>{c.pod}</td>
+                  <td>{c.cabina}</td>
+                  <td className="a-center">
+                    <span className={`dot ${c.hasDoc ? "ok" : ""}`} title="Documento"></span>
+                    <span className={`dot ${c.hasTessera ? "ok" : ""}`} title="Tessera"></span>
+                    <span className={`dot ${c.hasBolletta ? "ok" : ""}`} title="Bolletta"></span>
+                    <span className={`dot ${c.hasPrivacy ? "ok" : ""}`} title="Privacy"></span>
+                  </td>
+                  <td className="a-right">
+                    <button className="btn small" onClick={() => onPick(c)}>Modifica</button>
                   </td>
                 </tr>
               ))}
-              {!list.length && <tr><td colSpan={8} style={{color:'var(--sub)'}}>Nessun cliente presente.</td></tr>}
             </tbody>
           </table>
+        </div>
+
+        {/* Form */}
+        <div className="card">
+          <h2>Scheda Cliente</h2>
+          <div className="form-grid">
+            <div className="form-row">
+              <label>Nome</label>
+              <input value={form.nome} onChange={(e) => onChange("nome", e.target.value)} />
+            </div>
+            <div className="form-row">
+              <label>Email</label>
+              <input type="email" value={form.email} onChange={(e) => onChange("email", e.target.value)} />
+            </div>
+            <div className="form-row">
+              <label>Telefono</label>
+              <input value={form.telefono} onChange={(e) => onChange("telefono", e.target.value)} />
+            </div>
+            <div className="form-row two">
+              <div>
+                <label>POD</label>
+                <input value={form.pod} onChange={(e) => onChange("pod", e.target.value)} />
+              </div>
+              <div>
+                <label>Cabina</label>
+                <input value={form.cabina} onChange={(e) => onChange("cabina", e.target.value)} />
+              </div>
+            </div>
+
+            <fieldset className="attachments">
+              <legend>Allegati obbligatori</legend>
+              <div className="attach-row">
+                <span className={`dot ${form.hasDoc ? "ok" : ""}`}></span>
+                <label>Documento di riconoscimento</label>
+                <input type="file" onChange={(e) => onFileChange("hasDoc", e.target.files)} />
+              </div>
+              <div className="attach-row">
+                <span className={`dot ${form.hasTessera ? "ok" : ""}`}></span>
+                <label>Tessera sanitaria</label>
+                <input type="file" onChange={(e) => onFileChange("hasTessera", e.target.files)} />
+              </div>
+              <div className="attach-row">
+                <span className={`dot ${form.hasBolletta ? "ok" : ""}`}></span>
+                <label>Bolletta</label>
+                <input type="file" onChange={(e) => onFileChange("hasBolletta", e.target.files)} />
+              </div>
+              <div className="attach-row">
+                <span className={`dot ${form.hasPrivacy ? "ok" : ""}`}></span>
+                <label>Privacy</label>
+                <input type="file" onChange={(e) => onFileChange("hasPrivacy", e.target.files)} />
+              </div>
+            </fieldset>
+
+            <div className="actions a-right">
+              <button className="btn" onClick={onNew}>Annulla</button>
+              <button className="btn primary" onClick={onSave}>Salva</button>
+            </div>
+          </div>
         </div>
       </section>
     </div>
