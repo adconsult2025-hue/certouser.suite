@@ -5,48 +5,27 @@ if (!DB_URL) throw new Error('DATABASE URL mancante (NETLIFY_DATABASE_URL / NEON
 
 const client = new Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
 
-const INIT_SQL = `
+const INIT_SQL = 
 create table if not exists users (
   id bigserial primary key,
   email text unique not null,
   display_name text,
   created_at timestamptz default now()
 );
-
 create table if not exists roles (
   id bigserial primary key,
   email text not null references users(email) on delete cascade,
   role  text not null check (role in ('SUPERADMIN','ADMIN_CER','COLLABORATORE','VIEWER')),
-  cer_id text,               -- verrÃ  normalizzato a NOT NULL DEFAULT ''
+  cer_id text,
   territori text,
   assigned_at timestamptz default now()
 );
-
--- MIGRAZIONE IDPOTENTE: normalizza cer_id a NOT NULL DEFAULT ''
-update roles set cer_id = '' where cer_id is null;
-
-alter table roles alter column cer_id set default '';
--- set not null in modo idempotente (riesegue senza errori se giÃ  fatto)
-do $$
-begin
-  if exists (select 1 from information_schema.columns
-             where table_name='roles' and column_name='cer_id' and is_nullable='YES') then
-    alter table roles alter column cer_id set not null;
-  end if;
-end$$;
-
--- crea indici â€œnormaliâ€
 create index if not exists roles_email_idx on roles(email);
 create index if not exists roles_cer_idx   on roles(cer_id);
-
--- UNIQUE CONSTRAINT per lâ€™upsert
-do $$
-begin
-  if not exists (select 1 from pg_constraint where conname = 'roles_unique') then
-    alter table roles add constraint roles_unique unique (email, role, cer_id);
-  end if;
-end$$;
-`;
+-- unico per (email, role, COALESCE(cer_id,''))
+create unique index if not exists roles_unique
+  on roles(email, role, coalesce(cer_id,''));
+;
 
 let _ready;
 async function ready() {

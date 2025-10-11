@@ -1,0 +1,4 @@
+﻿email,role,cer_id,territori,display_name
+admin@certouser.it,SUPERADMIN,,"FR001;RM002",Admin
+user1@certouser.it,ADMIN_CER,CER123,"RM001;RM002",Mario Rossi
+user2@certouser.it,VIEWER,,,

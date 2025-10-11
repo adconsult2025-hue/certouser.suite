@@ -1,0 +1,28 @@
+/* ==== CERtoUSER Theme (reset + tema verde scuro) ==== */
+:root{
+  --bg:#031B13; --panel:#06231A; --panel-strong:#08281E; --stroke:#0E3B2C;
+  --text:#E7F6EE; --muted:#9AD3B8; --accent:#1CE97B; --accent-2:#03C25F;
+  --warn:#FFC045; --danger:#FF4B4B; --chip:#0A2C21; --chip-stroke:#134D3A;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:500 14px/1.45 Inter,system-ui,Segoe UI,Roboto,sans-serif}
+img{max-width:100%;height:auto} a{color:var(--accent-2);text-decoration:none}
+h1,h2,h3{margin:.4em 0 0.2em} p{margin:0.35em 0}
+button,input,select,textarea{font:inherit;color:inherit}
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th{color:var(--muted);font-weight:600;text-align:left}
+td,th{padding:8px 10px}
+
+/* elementi Ã¢â‚¬Å“baseÃ¢â‚¬Â cosÃƒÂ¬ la grafica si vede anche senza classi */
+header,nav,main,section,footer,.panel{background:linear-gradient(180deg,var(--panel),var(--panel-strong));
+  border:1px solid var(--stroke);border-radius:12px;padding:14px}
+.container{max-width:1100px;margin:0 auto;padding:16px}
+.nav a, .nav button{display:inline-block;margin:4px 6px;padding:8px 10px;border:1px solid var(--stroke);
+  border-radius:10px;background:#09261D;color:var(--text)}
+.nav a:hover,.nav button:hover{border-color:var(--accent-2)}
+.btn{background:var(--accent);color:#052014;border:none;padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--stroke);padding:8px 12px;border-radius:12px}
+.input{width:100%;background:#0A261D;border:1px solid var(--stroke);color:var(--text);padding:10px 12px;border-radius:12px;outline:none}
+.input:focus{box-shadow:0 0 0 3px rgba(28,233,123,.25), 0 0 0 1px rgba(28,233,123,.75) inset;border-color:var(--accent-2)}
+.badge{background:#1B392E;color:#B0F3D5;border:1px solid var(--stroke);padding:3px 8px;border-radius:20px;font-weight:700;font-size:12px}
+hr{border:0;height:1px;background:var(--stroke);margin:16px 0}

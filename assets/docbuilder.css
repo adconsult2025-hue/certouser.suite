@@ -1,0 +1,13 @@
+.container{max-width:1100px;margin:0 auto;padding:20px}
+.card{background:#0b0f0d;border:1px solid #16a34a22;border-radius:16px;padding:16px;margin:16px 0}
+h1,h2{color:#e5efe8}
+label{display:flex;flex-direction:column;gap:6px}
+input,select{background:#0d1411;border:1px solid #2a5244;border-radius:10px;padding:10px;color:#e5efe8}
+button{padding:10px 16px;border:1px solid #16a34a;border-radius:12px;background:transparent;color:#e5efe8;cursor:pointer}
+button:hover{background:#16a34a22}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:12px 0}
+nav a{margin-right:10px;color:#e5efe8;text-decoration:none}
+nav a.active{border-bottom:2px solid #16a34a}
+.upload input{display:none}
+.upload span{display:inline-block;padding:8px 12px;border:1px dashed #2a5244;border-radius:10px;cursor:pointer}
+#gen-result a{color:#16a34a}

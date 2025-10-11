@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gestione Ruoli | CertoUser Suite</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:24px}
+    h1{font-size:20px;margin:0 0 16px}
+    fieldset{border:1px solid #ddd;padding:12px;margin:0 0 16px;border-radius:8px}
+    legend{padding:0 6px;color:#555}
+    label{display:block;margin:6px 0 4px}
+    input,select,button{padding:8px;border:1px solid #ccc;border-radius:6px}
+    button{cursor:pointer}
+    .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #eee;padding:8px;text-align:left}
+    th{background:#fafafa}
+    .small{font-size:12px;color:#666}
+  </style>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+  <h1>Gestione Ruoli</h1>
+
+  <fieldset>
+    <legend>Ricerca / Lista</legend>
+    <div class="row">
+      <div>
+        <label for="q">Filtro (email / ruolo / CER)</label>
+        <input id="q" placeholder="es. admin o SUPERADMIN o CER123" />
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button id="btnList" type="button">Aggiorna elenco</button>
+      </div>
+    </div>
+    <div class="small">Suggerimento: lascia vuoto il filtro per vedere tutti i ruoli.</div>
+    <table class="table" id="tbl">
+      <thead>
+        <tr>
+          <th>Email</th><th>Ruolo</th><th>CER</th><th>Territori</th><th>Assegnato</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </fieldset>
+
+  <fieldset>
+    <legend>Assegna / Aggiorna ruolo</legend>
+    <div class="row">
+      <div><label for="email">Email *</label><input id="email" placeholder="utente@dominio.it" /></div>
+      <div>
+        <label for="role">Ruolo *</label>
+        <select id="role">
+          <option value="SUPERADMIN">SUPERADMIN</option>
+          <option value="ADMIN_CER">ADMIN_CER</option>
+          <option value="COLLABORATORE">COLLABORATORE</option>
+          <option value="VIEWER">VIEWER</option>
+        </select>
+      </div>
+      <div><label for="cer">CER (opz.)</label><input id="cer" placeholder="es. CER123 (vuoto = globale)" /></div>
+      <div><label for="territori">Territori (opz.)</label><input id="territori" placeholder="es. RM001;RM002" /></div>
+      <div><label for="display_name">Nome visibile (opz.)</label><input id="display_name" placeholder="Mario Rossi" /></div>
+      <div><label>&nbsp;</label><button id="btnAssign" type="button">Assegna / Aggiorna</button></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Revoca ruolo (tutti per email)</legend>
+    <div class="row">
+      <div><label for="email_revoke">Email *</label><input id="email_revoke" placeholder="utente@dominio.it" /></div>
+      <div><label>&nbsp;</label><button id="btnRevoke" type="button" style="background:#ffecec;border-color:#f5c2c7">Revoca tutti i ruoli</button></div>
+    </div>
+  </fieldset>
+
+  <script>
+    const API = '/.netlify/functions/roles';
+
+    async function listRoles(q = '') {
+      const url = q ? ${API}?q= : API;
+      const r = await fetch(url, { method: 'GET' });
+      if (!r.ok) throw new Error(GET /roles failed: );
+      const data = await r.json();
+      renderTable(data.rows || []);
+      return data.rows || [];
+    }
+
+    function renderTable(rows) {
+      const tbody = document.querySelector('#tbl tbody');
+      tbody.innerHTML = '';
+      for (const row of rows) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = 
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        ;
+        tbody.appendChild(tr);
+      }
+    }
+
+    async function assignRole({ email, role, cer_id = '', territori = '', display_name = null }) {
+      const r = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, role, cer_id, territori, display_name })
+      });
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        throw new Error(POST /roles assign failed:  );
+      }
+      return r.json();
+    }
+
+    async function revokeRole(email) {
+      const r = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, action: 'revoke' })
+      });
+      if (!r.ok) {
+        const t = await r.text().catch(() => '');
+        throw new Error(POST /roles revoke failed:  );
+      }
+      return r.json();
+    }
+
+    document.getElementById('btnList').addEventListener('click', async () => {
+      const q = document.getElementById('q').value.trim();
+      try { await listRoles(q); } catch(e){ alert(e.message); }
+    });
+
+    document.getElementById('btnAssign').addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const role  = document.getElementById('role').value.trim();
+      const cer   = document.getElementById('cer').value.trim();
+      const terr  = document.getElementById('territori').value.trim();
+      const dn    = document.getElementById('display_name').value.trim();
+      if (!email || !role) return alert('Email e Ruolo sono obbligatori');
+      try {
+        await assignRole({ email, role, cer_id: cer, territori: terr, display_name: dn || null });
+        await listRoles(document.getElementById('q').value.trim());
+        alert('Ruolo assegnato/aggiornato');
+      } catch(e){ alert(e.message); }
+    });
+
+    document.getElementById('btnRevoke').addEventListener('click', async () => {
+      const email = document.getElementById('email_revoke').value.trim();
+      if (!email) return alert('Email obbligatoria');
+      if (!confirm(Revocare tutti i ruoli per ?)) return;
+      try {
+        await revokeRole(email);
+        await listRoles(document.getElementById('q').value.trim());
+        alert('Ruoli revocati');
+      } catch(e){ alert(e.message); }
+    });
+
+    listRoles().catch(console.error);
+  </script>
+</body>
+</html>

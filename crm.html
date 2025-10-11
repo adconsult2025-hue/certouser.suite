@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>CERtoUSER ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â CRM (POD=Cliente)</title>
+<style>
+:root{--bg:#0b1714; --bg2:#0e1c17; --card:#0f251e; --card2:#0e221b; --fg:#d8f5e7; --muted:#9cc9b3; --line:#163d2e; --accent:#1dd37e; --danger:#b34d4d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,var(--bg2),var(--bg));color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+a{color:#7ecaff;text-decoration:none} a:hover{text-decoration:underline}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #103229;background:var(--bg2)}
+nav{margin-left:auto;display:flex;gap:16px}
+.container{max-width:1250px;margin:24px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px}
+.card.soft{background:var(--card2)}
+.row{display:flex;gap:10px;align-items:center;margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+input,select,button,textarea{background:#0a2019;color:var(--fg);border:1px solid #164534;border-radius:10px;padding:8px 10px}
+button{background:#0f7a4a;border-color:#1aa266;cursor:pointer}
+button.secondary{background:#11362b}button.danger{background:#5a2323;border-color:#7a3535}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-top:1px solid var(--line);padding:8px 6px;vertical-align:top}
+thead th{position:sticky;top:0;background:#123126}
+.badge{padding:2px 8px;border-radius:999px;font-size:.8em;border:1px solid #2b7d59}
+.badge.ok{background:#123a2b;border-color:#1aa266;color:#a6ffd7}
+.badge.err{background:#402020;border-color:#7a3535;color:#ffd0d0}
+.pill{display:inline-block;padding:2px 6px;border:1px solid #2b7d59;border-radius:999px;margin-left:6px;font-size:.8em}
+.iconbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1px solid #164534;background:#0e241c}
+small.muted{color:var(--muted)}
+.filterbar{display:flex;gap:8px;align-items:center;margin:8px 0}
+.filterpill{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid #2b7d59;border-radius:999px}
+.filterpill button{background:transparent;border:none;color:inherit;cursor:pointer;padding:0 4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:60}
+.modal .modal-card{background:#0f251e;border:1px solid #164534;border-radius:16px;max-width:640px;width:92%;padding:16px}
+.modal .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+</style>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+<header>
+  <div class="brand">ÃƒÂ°Ã…Â¸Ã¢â‚¬ËœÃ‚Â¥ <strong>CERtoUSER ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â CRM</strong> <span class="pill">Modello: 1 POD = 1 Cliente</span></div>
+  <nav><a class="btn" href="index.html">Home</a><a href="crm.html" class="active">CRM</a><a class="btn" href="cer.html">CER</a></nav>
+</header>
+<main class="container">
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h3 style="margin:0">Clienti (POD)</h3>
+      <div class="row">
+        <input id="search" placeholder="Cerca POD, CF/P.IVA, nome, email" style="min-width:300px">
+        <button id="btnNew">+ Nuovo POD</button>
+        <button id="btnExport" class="secondary">Export CSV</button>
+        <input type="file" id="importCsv" style="display:none" accept=".csv"/>
+        <button id="btnImport" class="secondary">Import CSV</button>
+        <button id="btnReset" class="danger">Reset dati locali</button>
+      </div>
+    </div>
+    <div id="cabFilterBar" class="filterbar" style="display:none"></div>
+    <table class="table" id="tblClienti">
+      <thead><tr><th>POD</th><th>Cabina</th><th>Cliente</th><th>CF / P.IVA</th><th>Email</th><th>Telefono</th><th>Azioni</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="grid">
+    <div class="card soft">
+      <h3 style="margin:0 0 8px">Scheda POD/Cliente</h3>
+      <form id="formCli">
+        <input type="hidden" id="cliId"/>
+        <div class="row"><label style="width:160px">POD</label><input id="cliPOD" required placeholder="IT001E..."></div>
+        <div class="row"><label style="width:160px">Cabina</label><input id="cliCabina"> <a class="iconbtn" id="btnVerificaPOD" href="https://www.gse.it/servizi-per-te/autoconsumo/mappa-interattiva-delle-cabine-primarie" target="_blank" rel="noopener">ÃƒÂ°Ã…Â¸Ã¢â‚¬â€Ã‚ÂºÃƒÂ¯Ã‚Â¸Ã‚Â verifica pod</a></div>
+        <hr style="border:none;border-top:1px solid var(--line)">
+        <div class="row"><label style="width:160px">Ragione sociale / Nome</label><input id="cliNome"></div>
+        <div class="row"><label style="width:160px">CF / P.IVA</label><input id="cliCF"></div>
+        <div class="row"><label style="width:160px">Email</label><input id="cliEmail"> <a id="mailBtn" class="iconbtn" href="#" target="_blank" rel="noopener">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â°ÃƒÂ¯Ã‚Â¸Ã‚Â</a></div>
+        <div class="row"><label style="width:160px">Telefono</label><input id="cliTel"> <a id="waBtn" class="iconbtn" href="#" target="_blank" rel="noopener">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬</a></div>
+        <div class="row"><label style="width:160px">Indirizzo</label><input id="cliAddr"></div>
+        <div class="row"><label style="width:160px">IBAN</label><input id="cliIban" placeholder="(facoltativo)"></div>
+        <div class="row" style="justify-content:flex-end;gap:8px">
+          <button type="button" id="btnDupPOD" class="secondary">+ Nuovo POD da questo cliente</button>
+          <button>Salva</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card soft">
+      <h3 style="margin:0 0 8px">Cronoprogramma documentale</h3>
+      <div id="cronWrap"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card soft">
+      <h3 style="margin:0 0 8px">Consumi (kWh per fascia)</h3>
+      <form id="formConsumo">
+        <div class="row">
+          <label style="width:160px">Mese</label><input id="cMese" type="month" style="width:180px">
+          <label>F1</label><input id="cF1" type="number" style="width:110px">
+          <label>F2</label><input id="cF2" type="number" style="width:110px">
+          <label>F3</label><input id="cF3" type="number" style="width:110px">
+        </div>
+        <div class="row" style="justify-content:flex-end"><button>Registra consumo</button></div>
+      </form>
+      <table class="table" id="tblCons"><thead><tr><th>Mese</th><th>F1</th><th>F2</th><th>F3</th><th>Totale</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card soft">
+      <h3 style="margin:0 0 8px">Collega alla CER</h3>
+      <div class="row"><label style="width:160px">CER</label><select id="selCER"></select> <span id="cabMatch" class="badge">Cabina: ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â</span></div>
+      <div class="row"><label style="width:160px">Ruolo</label><select id="selRuolo"><option value="consumer">Consumer</option><option value="prosumer">Prosumer (richiede impianto)</option><option value="produttore">Produttore (richiede impianto)</option></select></div>
+      <div class="row" style="justify-content:flex-end"><button id="btnAddToCER">Aggiungi alla CER</button></div>
+      <small class="muted">Per Prosumer/Produttore deve esistere un impianto intestato a questo POD/cliente (crealo in CER ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Impianti).</small>
+    </div>
+  </div>
+</main>
+
+<script>
+if(!('crypto' in window) || !('randomUUID' in crypto)){ window.crypto=window.crypto||{}; crypto.randomUUID=function(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})};}
+const store={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(_){return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const state={ clienti:store.get('clienti',[]), consumi:store.get('consumi',{}), cer:store.get('cer',[]), partecipanti:store.get('partecipanti',[]), impianti:store.get('impianti',[]), cliDocs:store.get('cliDocs',{}) };
+const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+
+function renderClienti(filter=''){
+  const tb=qs('#tblClienti tbody'); tb.innerHTML='';
+  const term=(filter||'').toLowerCase();
+  (state.clienti||[]).forEach(c=>{
+    if(term && ![c.pod,c.cf,c.nome,c.email].some(v=>(v||'').toLowerCase().includes(term))) return;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${c.pod||'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</strong></td><td data-cab="${c.cabina||''}"><u>${c.cabina||''}</u></td><td>${c.nome||''}</td><td>${c.cf||''}</td>
+      <td>${c.email?('<a class="btn" href="mailto:'+c.email+'">ÃƒÂ¢Ã…â€œÃ¢â‚¬Â°ÃƒÂ¯Ã‚Â¸Ã‚Â '+c.email+'</a>'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>
+      <td>${c.tel?('<a class="btn" href="https://wa.me/'+c.tel.replace(/\D/g,'')+'" target="_blank" rel="noopener">ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬ '+c.tel+'</a>'):'ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'}</td>
+      <td><button class="secondary" data-edit="${c.id}">Modifica</button> <button class="secondary danger" data-del="${c.id}">Elimina</button></td>`;
+    tb.appendChild(tr);
+  });
+  qsa('[data-edit]').forEach(b=>b.onclick=()=>loadCliente(b.dataset.edit));
+  qsa('[data-del]').forEach(b=>b.onclick=()=>{ if(!confirm('Eliminare il POD/cliente?')) return; state.clienti=state.clienti.filter(x=>x.id!==b.dataset.del); store.set('clienti', state.clienti); renderClienti(qs('#search').value||''); });
+}
+
+function loadCliente(id){
+  const c=(state.clienti||[]).find(x=>x.id===id); if(!c) return;
+  qs('#cliId').value=c.id; qs('#cliPOD').value=c.pod||''; qs('#cliCabina').value=c.cabina||'';
+  qs('#cliNome').value=c.nome||''; qs('#cliCF').value=c.cf||''; qs('#cliEmail').value=c.email||''; qs('#cliTel').value=c.tel||''; qs('#cliAddr').value=c.addr||''; qs('#cliIban').value=c.iban||'';
+  qs('#mailBtn').href = c.email?('mailto:'+c.email):'#'; qs('#waBtn').href = c.tel?('https://wa.me/'+c.tel.replace(/\D/g,'')):'#';
+  renderCrono(id); renderConsumi(id); renderCERSelect(); updateCabinaBadge();
+}
+
+qs('#btnNew').onclick=()=>{ qs('#cliId').value=''; qs('#formCli').reset(); qs('#cronWrap').innerHTML=''; qs('#tblCons tbody').innerHTML=''; };
+
+qs('#formCli').onsubmit=(e)=>{
+  e.preventDefault();
+  const id=qs('#cliId').value || crypto.randomUUID();
+  const pod=(qs('#cliPOD').value||'').trim().toUpperCase(); if(!pod){ alert('POD obbligatorio'); return; }
+  if((state.clienti||[]).some(c=>c.pod===pod && c.id!==id)){ alert('POD giÃƒÆ’Ã‚Â  presente in anagrafica.'); return; }
+  const obj={ id, pod, cabina:(qs('#cliCabina').value||'').trim(), nome:qs('#cliNome').value.trim(), cf:qs('#cliCF').value.trim(), email:qs('#cliEmail').value.trim(), tel:qs('#cliTel').value.trim(), addr:qs('#cliAddr').value.trim(), iban:qs('#cliIban').value.trim() };
+  const i=(state.clienti||[]).findIndex(x=>x.id===id); if(i>=0) state.clienti[i]=obj; else state.clienti.push(obj);
+  store.set('clienti', state.clienti); renderClienti(qs('#search').value||''); loadCliente(id);
+};
+
+qs('#btnDupPOD').onclick=()=>{
+  const baseId=qs('#cliId').value; if(!baseId){ alert('Salva prima questo cliente/POD.'); return; }
+  const base=(state.clienti||[]).find(c=>c.id===baseId); if(!base) return;
+  const id=crypto.randomUUID();
+  const obj={ id, pod:'', cabina:'', nome:base.nome, cf:base.cf, email:base.email, tel:base.tel, addr:base.addr, iban:base.iban };
+  state.clienti.push(obj); store.set('clienti', state.clienti); renderClienti(qs('#search').value||''); loadCliente(id);
+};
+
+qs('#formConsumo').onsubmit=(e)=>{
+  e.preventDefault(); const id=qs('#cliId').value; if(!id){ alert('Seleziona/salva prima.'); return; }
+  const m=qs('#cMese').value, f1=Number(qs('#cF1').value||0), f2=Number(qs('#cF2').value||0), f3=Number(qs('#cF3').value||0);
+  const rec={month:m,f1:f1,f2:f2,f3:f3,kwh:(f1+f2+f3)}; (state.consumi[id]||(state.consumi[id]=[]));
+  const idx=state.consumi[id].findIndex(x=>x.month===m); if(idx>=0) state.consumi[id][idx]=rec; else state.consumi[id].push(rec);
+  store.set('consumi', state.consumi); qs('#formConsumo').reset(); renderConsumi(id);
+};
+function renderConsumi(id){
+  const tb=qs('#tblCons tbody'); tb.innerHTML='';
+  (state.consumi[id]||[]).forEach(r=>{
+    const tot=r.kwh!=null?r.kwh:((r.f1||0)+(r.f2||0)+(r.f3||0));
+    const tr=document.createElement('tr'); tr.innerHTML=`<td>${r.month}</td><td>${r.f1||0}</td><td>${r.f2||0}</td><td>${r.f3||0}</td><td>${tot}</td><td><button class="secondary danger" data-rm="${r.month}">Rimuovi</button></td>`; tb.appendChild(tr);
+  });
+  qsa('[data-rm]').forEach(b=>b.onclick=()=>{ const cid=qs('#cliId').value; state.consumi[cid]=(state.consumi[cid]||[]).filter(x=>x.month!==b.dataset.rm); store.set('consumi', state.consumi); renderConsumi(cid); });
+}
+
+function renderCrono(id){
+  const wrap=qs('#cronWrap'); wrap.innerHTML='';
+  const steps=[
+    {id:'doc_id',  titolo:'Documento di riconoscimento', req:true},
+    {id:'ts',      titolo:'Tessera Sanitaria', req:true},
+    {id:'bollette',titolo:'Bollette ultimi 12 mesi', req:true},
+    {id:'privacy', titolo:'Privacy', req:true},
+    {id:'contratto_cer', titolo:'Contratto di adesione alla CER', req:true}
+  ];
+  const docs=(state.cliDocs[id]||[]);
+  steps.forEach(st=>{
+    const row=document.createElement('div'); row.className='row'; row.style.borderTop='1px solid var(--line)';
+    const count=docs.filter(d=>d.stepId===st.id).length;
+    row.innerHTML = `<div style="flex:1"><strong>${st.titolo}</strong> ${st.req?'<span class="pill">obbl.</span>':''}</div>
+      <div class="row"><input type="file" data-file="${st.id}"><button class="secondary" data-adddoc="${st.id}" type="button">Allega</button><button class="iconbtn" data-view="${st.id}" type="button">Vedi allegati (${count})</button></div>`;
+    wrap.appendChild(row);
+  });
+  wrap.onclick=(e)=>{
+    const t=e.target; const cid=qs('#cliId').value;
+    if(t.getAttribute('data-adddoc')){
+      const sid=t.getAttribute('data-adddoc'); const f=wrap.querySelector('[data-file="'+sid+'"]').files[0]; if(!f) return;
+      const fr=new FileReader(); fr.onload=()=>{
+        (state.cliDocs[cid]||(state.cliDocs[cid]=[])).push({id:crypto.randomUUID(),name:f.name,type:f.type,sizeB:f.size,base64:String(fr.result).split(',')[1]||'',stepId:sid});
+        store.set('cliDocs', state.cliDocs); renderCrono(cid);
+      }; fr.readAsDataURL(f);
+    }
+    if(t.getAttribute('data-view')){
+      const sid=t.getAttribute('data-view'); const list=(state.cliDocs[cid]||[]).filter(d=>d.stepId===sid);
+      alert(list.length?('Allegati:\n- '+list.map(d=>d.name).join('\n- ')):'Nessun documento per questo step.');
+    }
+  };
+}
+
+function renderCERSelect(){
+  const sel=qs('#selCER'); sel.innerHTML=''; (state.cer||[]).forEach(c=>{const o=document.createElement('option'); o.value=c.id; o.textContent=c.nome||'(senza nome)'; sel.appendChild(o)});
+}
+function updateCabinaBadge(){
+  const badge=qs('#cabMatch'); const cid=qs('#cliId').value; const cerId=qs('#selCER').value;
+  const cli=(state.clienti||[]).find(c=>c.id===cid)||{}; const cer=(state.cer||[]).find(x=>x.id===cerId)||{};
+  const cabCli=(cli.cabina||'').trim().toLowerCase(); const cabCer=(cer.cabina||'').trim().toLowerCase();
+  if(!badge) return;
+  if(!cabCli || !cabCer){ badge.className='badge'; badge.textContent='Cabina: ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â'; return; }
+  if(cabCli===cabCer){ badge.className='badge ok'; badge.textContent='Cabina OK ('+(cli.cabina||'')+')'; } else { badge.className='badge err'; badge.textContent='Cabina NON coincidente'; }
+}
+qs('#selCER').addEventListener('change', updateCabinaBadge);
+qs('#cliCabina').addEventListener('input', updateCabinaBadge);
+
+qs('#btnAddToCER').onclick=()=>{
+  const cid=qs('#cliId').value; if(!cid){ alert('Seleziona/salva prima.'); return; }
+  const cerId=qs('#selCER').value; const ruolo=qs('#selRuolo').value;
+  if(!cerId){ alert('Seleziona una CER.'); return; }
+  const cli=(state.clienti||[]).find(c=>c.id===cid)||{}; const cer=(state.cer||[]).find(x=>x.id===cerId)||{};
+  if(((cli.cabina||'').trim().toLowerCase())!==((cer.cabina||'').trim().toLowerCase())){ alert('Cabina non coincidente tra POD/cliente e CER.'); return; }
+  if(ruolo!=='consumer'){ const hasImp=(state.impianti||[]).some(i=>i.clienteId===cid); if(!hasImp){ alert('Per Prosumer/Produttore serve un impianto intestato a questo POD/cliente (crealo in CER ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ Impianti).'); return; } }
+  const imp = (ruolo==='consumer')?null:(state.impianti.find(i=>i.clienteId===cid)||null);
+  (state.partecipanti||(state.partecipanti=[])).push({id:crypto.randomUUID(),cerId:cerId,clienteId:cid,ruolo:ruolo,impiantoId:imp?imp.id:null});
+  store.set('partecipanti', state.partecipanti); alert('Aggiunto alla CER.'); 
+};
+
+qs('#search').addEventListener('input', (e)=>renderClienti(e.target.value||''));
+
+if(!(state.clienti||[]).length){
+  state.clienti=[{id:crypto.randomUUID(),pod:"IT001E1234567890",cabina:"Roma CP1",nome:"Mario Rossi",cf:"RSSMRA80A01H501Z",email:"mario.rossi@example.com",tel:"3331234567",addr:"Via Roma 1, Roma",iban:""}]; store.set('clienti', state.clienti);
+}
+renderClienti(); renderCERSelect();
+</script>
+</body></html>

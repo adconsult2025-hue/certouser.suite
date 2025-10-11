@@ -1,0 +1,5 @@
+netlify/functions/_secrets/
+.netlify/
+node_modules/
+*.zip
+netlify/functions/node_modules/

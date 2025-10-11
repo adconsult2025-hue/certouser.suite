@@ -1,0 +1,5 @@
+﻿"email","role","cer_id","territori","assigned_at"
+"user2@certouser.it","VIEWER","","","2025-10-10T13:38:12.542Z"
+"user1@certouser.it","ADMIN_CER","CER123","RM001;RM002","2025-10-10T13:38:11.503Z"
+"admin@certouser.it","SUPERADMIN","","FR001;RM002","2025-10-10T13:38:10.558Z"
+"user@certouser.it","ADMIN_CER","CER123","RM001;RM002","2025-10-10T13:27:01.582Z"
