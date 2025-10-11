@@ -1,32 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-let admin;
+﻿const admin = require('firebase-admin');
 
-function initFromFile() {
-  try {
-    const p = path.join(__dirname, '_secrets', 'firebase-admin.json');
-    if (fs.existsSync(p)) {
-      const c = JSON.parse(fs.readFileSync(p, 'utf8'));
-      return { projectId: c.project_id, clientEmail: c.client_email, privateKey: c.private_key };
-    }
-  } catch (e) { console.warn('Firebase creds file error:', e.message); }
-  return null;
+function getServiceAccount(){
+  const raw = process.env.FIREBASE_ADMIN_JSON || null;
+  const b64 = process.env.FIREBASE_ADMIN_B64 || null;
+  if (!raw && !b64) throw new Error('FIREBASE_ADMIN_JSON/B64 not set');
+  const json = raw ? raw : Buffer.from(b64, 'base64').toString('utf8');
+  return JSON.parse(json);
 }
-function initFromEnv() {
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
-  if (projectId && clientEmail && privateKey) { privateKey = privateKey.replace(/\\n/g, '\n'); return { projectId, clientEmail, privateKey }; }
-  return null;
+
+if (!admin.apps.length) {
+  admin.initializeApp({ credential: admin.credential.cert(getServiceAccount()) });
 }
-function getAdmin() {
-  if (admin) return admin;
-  admin = require('firebase-admin');
-  if (!admin.apps.length) {
-    const creds = initFromFile() || initFromEnv();
-    if (!creds) console.warn('Firebase Admin: nessuna credenziale trovata (file o env).');
-    else admin.initializeApp({ credential: admin.credential.cert(creds) });
-  }
-  return admin;
-}
-module.exports = { getAdmin };
+
+module.exports = admin;
