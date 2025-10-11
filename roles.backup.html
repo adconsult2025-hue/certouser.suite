@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ruoli & Accessi ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â CERtoUSER</title>
+  <link rel="icon" href="/assets/logo.svg" />
+  <link rel="stylesheet" href="/styles/hotfix.css" />
+  <link rel="stylesheet" href="/styles/styles.css" />
+  <script defer src="/js/roles.js"></script>
+  <style>.muted{color:#9fb1a9;font-size:12px}</style>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+  <div class="container">
+    <div class="header">
+      <img src="/assets/logo.svg" alt="CERtoUSER" />
+      <h1>Ruoli & Accessi</h1>
+      <div style="margin-left:auto"><a class=" btn  href="/">ÃƒÂ¢Ã¢â‚¬Â Ã‚Â Hub</a></div>
+    </div>
+    <div class="grid">
+      <div class="card" style="min-width:340px">
+        <h2>Invita / assegna ruolo</h2>
+        <div class="row">
+          <input id="email" class="input" type="email" placeholder="email utente (Firebase)" />
+          <select id="role" class="input">
+            <option value="">Seleziona ruoloÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</option>
+            <option value="SUPERADMIN">SuperAdmin</option>
+            <option value="ADMIN_CER">Admin CER</option>
+            <option value="COLLABORATORE">Collaboratore</option>
+            <option value="VIEWER">Viewer</option>
+          </select>
+        </div>
+        <div class="row">
+          <input id="cerId" class="input" placeholder="CER ID (opz.)" />
+          <input id="territori" class="input" placeholder="Territori (es. FR001;RM002)" />
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btn-assign">Assegna</button>
+          <button class="btn" id="btn-revoke">Revoca</button>
+        </div>
+        <div id="msg" class="muted" style="margin-top:8px"></div>
+        <p class="muted">Suggerimento: imposta le variabili FIREBASE_* su Netlify per creare l'utente se non esiste.</p>
+      </div>
+      <div class="card" style="min-width:420px">
+        <h2>Utenti & ruoli (NEON)</h2>
+        <div class="row">
+          <input id="q" class="input" placeholder="Filtro email/ruolo/cerÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦" />
+          <button class="btn" id="btn-reload">Ricarica</button>
+        </div>
+        <table class="table" id="tbl">
+          <thead><tr><th>Email</th><th>Ruolo</th><th>CER</th><th>Territori</th><th>Assegnato</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <footer>Ãƒâ€šÃ‚Â© CERtoUSER ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â La tua energia condivisa</footer>
+  </div>
+</body>
+</html>

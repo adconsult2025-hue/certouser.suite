@@ -1,17 +1,58 @@
 <!doctype html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CER to USER — Suite</title>
-  </head>
-  <body>
-    <div id="root"></div>
-
-    <!-- Widget Identity: va bene anche se lo ricarichiamo da App.tsx in fallback -->
-    <script defer src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CERtoUSER Suite ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Hub</title>
+  <link rel="icon" href="/assets/logo.svg">
+  <link rel="stylesheet" href="/styles/hotfix.css">
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+  <div class="container">
+    <div class="header">
+      <img src="/assets/logo.svg" alt="CERtoUSER">
+      <h1>CERtoUSER Suite ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Hub</h1>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h2>CRM</h2>
+        <p>Anagrafiche clienti, POD, contatti e cronoprogramma documentale.</p>
+        <a class=" btn  primary href="/crm.html">Apri CRM</a>
+      </div>
+      <div class="card">
+        <h2>CER Manager</h2>
+        <p>Creazione e gestione CER, riparti, documenti e allegati.</p>
+        <a class=" btn  primary href="/cer.html">Apri CER Manager</a>
+      </div>
+      <div class="card">
+        <h2>Simulatore CT 3.0</h2>
+        <p>Validator ammissibilitÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â  e calcolo massimali.</p>
+        <a class=" btn  href="/simulatore.html">Apri Simulatore CT3</a>
+      </div>
+      <div class="card">
+        <h2>Simulatore Fotovoltaico</h2>
+        <p>Stime produzione, autoconsumo e ritorno.</p>
+        <a class=" btn  href="/simulatore_pv.html">Apri Simulatore FV</a>
+      </div>
+      <div class="card">
+        <h2>Contrattualistica</h2>
+        <p>Modelli documentali e workflow di firma.</p>
+        <a class=" btn  href="/cer.html#contratti">Apri</a>
+      </div>
+    </div>
+    <footer>ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© CERtoUSER ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â La tua energia condivisa</footer>
+  </div>
+<!-- Hub Buttons (injected) -->
+<div class="hub-grid" style="display:flex;flex-wrap:wrap;gap:14px;margin:24px 0;">
+  <a href="/crm.html" class=" btn >CRM</a>
+  <a href="/cer.html" class=" btn >CER</a>
+  <a href="/contratti.html" class=" btn >Contratti</a>
+</div>
+<style>
+  .btn{padding:12px 18px;border-radius:12px;text-decoration:none;border:1px solid #16a34a;display:inline-block}
+</style>
+</body>
 </html>
-
+<!-- ping 2025-10-11T09:51:56.6076240+02:00 -->

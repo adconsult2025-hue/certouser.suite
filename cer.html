@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>CERtoUSER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â CER (single-file v8)</title>
+<style>
+:root{
+  --bg:#0b1714; --bg2:#0e1c17; --card:#0f251e; --card2:#0e221b;
+  --fg:#d8f5e7; --muted:#9cc9b3; --accent:#1dd37e; --accent2:#34b38a; --line:#163d2e; --danger:#b34d4d;
+}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(1200px 800px at 20% 0%,var(--bg2),var(--bg));color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif}
+a{color:#7ecaff;text-decoration:none} a:hover{text-decoration:underline}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #103229;background:var(--bg2);position:sticky;top:0;z-index:10}
+header .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+nav{margin-left:auto;display:flex;gap:16px}
+.container{max-width:1280px;margin:24px auto;padding:0 16px}
+.panel{display:grid;grid-template-columns:1fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card.soft{background:var(--card2)}
+.row{display:flex;gap:10px;align-items:center;margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+input,select,button,textarea{background:#0a2019;color:var(--fg);border:1px solid #164534;border-radius:10px;padding:8px 10px}
+textarea{min-height:80px;resize:vertical}
+button{background:#0f7a4a;border-color:#1aa266;cursor:pointer;transition:transform .02s ease}
+button:active{transform:translateY(1px)} button.secondary{background:#11362b} button.ghost{background:transparent}
+button.danger{background:#5a2323;border-color:#7a3535}
+table{width:100%;border-collapse:collapse;font-size:14px} th,td{border-top:1px solid var(--line);padding:8px 6px;vertical-align:top} thead th{position:sticky;top:0;background:#123126}
+.cer-create{background:linear-gradient(180deg,rgba(0,120,70,.22),rgba(0,120,70,.08));border-color:rgba(0,190,120,.28)}
+.badge{padding:2px 8px;border-radius:999px;font-size:.8em;border:1px solid #2b7d59}
+.badge.green{background:#0a4424;color:#aef7c8}.badge.orange{background:#442a0a;color:#ffd7a6;border-color:#b3741a}
+.tabs{display:flex;gap:8px;margin:8px 0}
+.tab-btn{padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#0e241c;cursor:pointer}
+.tab-btn.active{background:#144a33}
+.tab-content{display:none}.tab-content.active{display:block}
+details{border:1px dashed #1a5840;border-radius:10px;padding:8px;margin-top:8px}
+details>summary{cursor:pointer;list-style:none}
+summary::-webkit-details-marker{display:none}
+.kv{display:grid;grid-template-columns:180px 1fr;gap:8px;align-items:center}
+.muted{color:var(--muted)} .sp{flex:1}
+small.help{opacity:.8}
+.checkgrid{display:grid;grid-template-columns:1.2fr 0.8fr 1fr 140px 1fr;gap:6px;align-items:center}
+.checkgrid > *{border:1px solid var(--line);border-radius:8px;padding:6px;background:#0b1f19}
+.step-done{background:#0b2a1f;border-color:#1e6b4a}
+hr.sep{border:none;border-top:1px solid var(--line);margin:12px 0}
+@media (max-width:980px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:1fr}.checkgrid{grid-template-columns:1fr}}
+</style>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+<header>
+  <div class="brand">ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¾ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ <span>CERtoUSER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â CER</span></div>
+  <nav><a href="#" class="active">CER</a></nav>
+</header>
+<main class="container">
+  <section class="panel">
+    <!-- CREAZIONE -->
+    <div class="card cer-create">
+      <div class="row" style="justify-content:space-between"><h3 style="margin:0">CER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Creazione</h3>
+        <div class="row"><span id="schemaBadge" class="badge orange">Schema: ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</span><button id="btnCreate" class="secondary" type="button">+ Crea CER</button></div>
+      </div>
+      <div class="grid">
+        <div>
+          <div class="row kv"><label>Nome CER</label><input id="newNome"></div>
+          <div class="row kv"><label>Cabina primaria</label><input id="newCabina"></div>
+          <div class="row kv"><label>Riparto incentivi (%)</label>
+            <div class="row" style="gap:8px">
+              <input id="ripGest" type="number" value="85" style="width:90px"><input id="ripMid" type="number" value="0" style="width:90px"><input id="ripCer" type="number" value="15" style="width:90px">
+            </div>
+          </div>
+          <small id="ripHelp" class="help">Schema: ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â (si imposta in base ai partecipanti) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ somma 100%</small>
+          <div class="row kv"><label>Quota condivisa (%)</label><input id="newQuota" type="number" value="0"></div>
+        </div>
+        <div>
+          <div class="row kv"><label>Documenti costitutivi</label><input id="newDocs" type="file" multiple></div>
+          <div class="row"><button id="btnAddDoc" type="button">Aggiungi documento</button><button id="btnStatuto" class="secondary" type="button">Genera Statuto</button><button id="btnReg" class="secondary" type="button">Genera Regolamento</button></div>
+          <table class="table" id="tblNewDocs"><thead><tr><th>Nome</th><th>Tipo</th><th>Dim</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELENCO CER -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h3 style="margin:0">Elenco CER</h3><span id="schemaBadgeCur" class="badge orange">Schema: ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</span></div>
+      <table class="table" id="tblCER"><thead><tr><th>Nome</th><th>Cabina</th><th>Quota</th><th>Riparto (din.)</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+      <div class="muted" id="emptyHint" style="margin-top:6px;display:none">Nessuna CERÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âcreane una sopra.</div>
+    </div>
+
+    <!-- MANAGER -->
+    <div class="grid">
+      <div class="card soft">
+        <h3 style="margin:0 0 6px">Partecipanti & Ruoli</h3>
+        <form id="formPart">
+          <div class="row kv"><label>Cliente</label><select id="selCliente"></select></div>
+          <div class="row kv"><label>Ruolo</label><select id="selRuolo"><option value="consumer">Consumer</option><option value="prosumer">Prosumer</option><option value="produttore">Produttore</option></select></div>
+          <div class="row" style="justify-content:flex-end"><button type="submit">Aggiungi partecipante</button></div>
+          <small class="muted">Prosumer/Produttore richiedono un impianto per il cliente.</small>
+        </form>
+        <table class="table" id="tblPart"><thead><tr><th>Cliente</th><th>Ruolo</th><th>Impianto</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card soft">
+        <h3 style="margin:0 0 6px">Impianti (per cliente)</h3>
+        <form id="formImp">
+          <div class="row kv"><label>Cliente</label><select id="impCliente"></select></div>
+          <div class="row kv"><label>Nome impianto</label><input id="impNome"></div>
+          <div class="row"><label>kWp</label><input id="impKwp" type="number" step="0.1" style="width:120px"><label>kWh/anno</label><input id="impKwh" type="number" style="width:140px"></div>
+          <div class="row"><label>Lat</label><input id="impLat" type="number" step="0.000001" style="width:140px"><label>Lon</label><input id="impLon" type="number" step="0.000001" style="width:140px"></div>
+          <div class="row" style="justify-content:flex-end"><button type="submit">Aggiungi/Collega impianto</button></div>
+        </form>
+        <table class="table" id="tblImp"><thead><tr><th>Cliente</th><th>Impianto</th><th>kWp</th><th>kWh/anno</th><th>Lat</th><th>Lon</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card soft">
+        <h3 style="margin:0 0 6px">Documenti CER</h3>
+        <div class="row kv"><label>Allega documento</label><input id="docFile" type="file"></div>
+        <div class="row"><button id="btnAddCerDoc" type="button">Aggiungi documento</button><button id="btnStatuto2" class="secondary" type="button">Genera Statuto</button><button id="btnReg2" class="secondary" type="button">Genera Regolamento</button></div>
+        <table class="table" id="tblDocs"><thead><tr><th>Nome</th><th>Tipo</th><th>Dim</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card soft">
+        <h3 style="margin:0 0 6px">Consumi clienti</h3>
+        <form id="formCons"><div class="row kv"><label>Cliente</label><select id="consCliente"></select></div>
+          <div class="row"><label>Mese</label><input id="consMese" type="month" style="width:160px"><label>kWh</label><input id="consKwh" type="number" style="width:120px"></div>
+          <div class="row" style="justify-content:flex-end"><button type="submit">Registra consumo</button></div></form>
+        <table class="table" id="tblCons"><thead><tr><th>Cliente</th><th>Mese</th><th>kWh</th><th>Azioni</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const store={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(_){return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const state={ cer:store.get('cer',[]), clienti:store.get('clienti',[{id:'c1',nome:'Mario Rossi'},{id:'c2',nome:'Rosa Verdi'}]), partecipanti:store.get('partecipanti',[]), impianti:store.get('impianti',[]), cerDocs:store.get('cerDocs',{}), consumi:store.get('consumi',{}), steps:store.get('cerSteps',{}) };
+let currentCERId=null;
+const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+function fillClientSelects(){['selCliente','impCliente','consCliente'].forEach(id=>{const sel=qs('#'+id); if(!sel) return; sel.innerHTML=''; state.clienti.forEach(c=>{const o=document.createElement('option'); o.value=c.id; o.textContent=c.nome; sel.appendChild(o)})})}
+function setSchemaBadge(el, schema){ if(!el) return; if(schema==='prod'){el.textContent='Schema: Gest/Prod/CER'; el.classList.remove('orange'); el.classList.add('green')} else if(schema==='pros'){el.textContent='Schema: Gest/Pros/CER'; el.classList.remove('orange'); el.classList.add('green')} else {el.textContent='Schema: ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'; el.classList.remove('green'); el.classList.add('orange')} }
+function deriveSchema(cerId){ const parts=state.partecipanti.filter(p=>p.cerId===cerId); const hasProd = parts.some(p=>p.ruolo==='produttore' && state.impianti.some(i=>i.id===p.impiantoId)); const hasPros = parts.some(p=>p.ruolo==='prosumer' && state.impianti.some(i=>i.id===p.impiantoId)); return hasProd ? 'prod' : (hasPros ? 'pros' : null); }
+function getCerConsumi(cerId){ const ids=state.partecipanti.filter(p=>p.cerId===cerId).map(p=>p.clienteId); let tot=0; ids.forEach(cid=> (state.consumi[cid]||[]).forEach(r=>tot+=Number(r.kwh)||0)); return tot; }
+
+// Creazione
+const newDocs=[];
+function renderNewDocs(){const tb=qs('#tblNewDocs tbody'); tb.innerHTML=''; newDocs.forEach(d=>{const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.name}</td><td>${d.type||'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'}</td><td>${(d.sizeB/1024).toFixed(1)} KB</td><td><button class="secondary" data-delnew="${d.id}">Rimuovi</button></td>`; tb.appendChild(tr)}); qsa('[data-delnew]').forEach(b=>b.onclick=()=>{const i=newDocs.findIndex(x=>x.id===b.dataset.delnew); if(i>=0)newDocs.splice(i,1); renderNewDocs()})}
+qs('#btnAddDoc').addEventListener('click',()=>{const files=qs('#newDocs').files; if(!files||!files.length) return; [...files].forEach(f=>{const fr=new FileReader(); fr.onload=()=>{newDocs.push({id:crypto.randomUUID(),name:f.name,type:f.type,sizeB:f.size,base64:String(fr.result).split(',')[1]||''}); renderNewDocs()}; fr.readAsDataURL(f)})});
+
+function updateRipHelp(schema){qs('#ripHelp').textContent = schema==='prod' ? 'Schema: Gest/Prod/CER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ somma 100%' : schema==='pros' ? 'Schema: Gest/Pros/CER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ somma 100%' : 'Schema: ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â (si imposta in base ai partecipanti) ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ somma 100%';}
+
+// FIX: bind robusto per Crea CER
+qs('#btnCreate').addEventListener('click', (ev)=>{
+  ev.preventDefault();
+  const gest=+qs('#ripGest').value||0, mid=+qs('#ripMid').value||0, cer=+qs('#ripCer').value||0;
+  if(Math.round((gest+mid+cer)*100)/100!==100){alert('La somma deve essere 100%'); return}
+  const id=crypto.randomUUID();
+  const obj={id,nome:(qs('#newNome').value||'').trim(),cabina:(qs('#newCabina').value||'').trim(),ripSchema:null,rip:{gestore:gest,pros:0,prod:0,cer},quota:+qs('#newQuota').value||0};
+  state.cer.push(obj);
+  state.cerDocs[id]=[...newDocs];
+  state.steps[id]=defaultSteps(); // init cronoprogramma
+  store.set('cer',state.cer); store.set('cerDocs',state.cerDocs); store.set('cerSteps',state.steps);
+  newDocs.splice(0); renderNewDocs(); renderList(); openCER(id); alert('CER creata');
+});
+
+// Manager: List con dettaglio per-CER (cronoprogramma + GSE)
+function renderList(){
+  const tb=qs('#tblCER tbody'); tb.innerHTML='';
+  if(!state.cer.length) qs('#emptyHint').style.display='block'; else qs('#emptyHint').style.display='none';
+  state.cer.forEach(c=>{
+    const midVal = c.ripSchema==='prod' ? (c.rip.prod||0) : (c.rip.pros||0);
+    const lbl = c.ripSchema==='prod' ? 'Gest/Prod/CER' : (c.ripSchema==='pros' ? 'Gest/Pros/CER' : 'Gest/Mid/CER');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${c.nome||''}</td><td>${c.cabina||''}</td><td>${c.quota||0}</td>
+      <td title="${lbl}">${c.rip.gestore||0} / ${midVal} / ${c.rip.cer||0}</td>
+      <td><button class="secondary" data-open="${c.id}">Apri</button> <button class="secondary ghost" data-det="${c.id}">Dettaglio</button> <button class="secondary danger" data-del="${c.id}">Elimina</button></td>`;
+    tb.appendChild(tr);
+    // Row detail below
+    const trd=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=5;
+    td.appendChild(detailBlock(c.id)); trd.appendChild(td); trd.style.display='none'; tb.appendChild(trd);
+    // wires
+    tr.querySelector('[data-open]').onclick=()=>openCER(c.id);
+    tr.querySelector('[data-del]').onclick=()=>{ if(!confirm('Eliminare la CER?')) return; state.cer=state.cer.filter(x=>x.id!==c.id); state.partecipanti=state.partecipanti.filter(p=>p.cerId!==c.id); delete state.cerDocs[c.id]; delete state.steps[c.id]; store.set('cer',state.cer); store.set('partecipanti',state.partecipanti); store.set('cerDocs',state.cerDocs); store.set('cerSteps',state.steps); renderList(); };
+    tr.querySelector('[data-det]').onclick=()=>{ trd.style.display = trd.style.display==='none' ? '' : 'none'; };
+  });
+}
+
+// Dettaglio per-CER (Cronoprogramma & GSE)
+function defaultSteps(){
+  return [
+    {id:'st1',titolo:'Costituzione CER',descr:'Statuto e Regolamento',done:false,docIds:[],note:''},
+    {id:'st2',titolo:'Registrazioni & Identificativi',descr:'ARERA / TERNA / GSE',done:false,docIds:[],note:''},
+    {id:'st3',titolo:'Contrattualistica membri',descr:'Adesione membri e ruoli',done:false,docIds:[],note:''},
+    {id:'st4',titolo:'Impianti',descr:'Allaccio e documentazione impianti',done:false,docIds:[],note:''},
+    {id:'st5',titolo:'Avvio riparto',descr:'Regole operative e parametri',done:false,docIds:[],note:''}
+  ];
+}
+function detailBlock(cerId){
+  const wrap=document.createElement('div');
+  wrap.className='card soft';
+  wrap.innerHTML=`
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="cron_${cerId}">Cronoprogramma</button>
+      <button class="tab-btn" data-tab="gse_${cerId}">Energia condivisa (GSE)</button>
+    </div>
+    <div id="cron_${cerId}" class="tab-content active"></div>
+    <div id="gse_${cerId}" class="tab-content"></div>
+  `;
+  // Cronoprogramma render
+  const steps = state.steps[cerId] || (state.steps[cerId]=defaultSteps(), state.steps[cerId]);
+  const cron = wrap.querySelector('#cron_'+cerId);
+  cron.appendChild(renderCrono(cerId, steps));
+  // GSE placeholder
+  const gse = wrap.querySelector('#gse_'+cerId);
+  gse.appendChild(renderGSE(cerId));
+  // tab wiring
+  wrap.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    wrap.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    wrap.querySelectorAll('.tab-content').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active'); wrap.querySelector('#'+btn.dataset.tab).classList.add('active');
+  }));
+  return wrap;
+}
+function renderCrono(cerId, steps){
+  const box=document.createElement('div');
+  steps.forEach(st=>{
+    const row=document.createElement('div');
+    row.className='checkgrid' + (st.done?' step-done':'');
+    row.innerHTML=`
+      <div><strong>${st.titolo}</strong><div class="muted">${st.descr}</div></div>
+      <div class="row"><label>Completo</label><input type="checkbox" ${st.done?'checked':''} data-done="${st.id}"></div>
+      <div><textarea placeholder="Note" data-note="${st.id}">${st.note||''}</textarea></div>
+      <div class="row"><input type="file" data-file="${st.id}" style="flex:1"><button class="secondary" data-adddoc="${st.id}" type="button">Allega</button></div>
+      <div><button class="ghost" data-viewdocs="${st.id}" type="button">Vedi allegati (${st.docIds.length})</button></div>
+    `;
+    box.appendChild(row);
+  });
+  // handlers
+  box.addEventListener('change', (e)=>{
+    const id=e.target.getAttribute('data-done'); if(!id) return;
+    const step=steps.find(x=>x.id===id); step.done=e.target.checked; store.set('cerSteps', state.steps);
+  });
+  box.addEventListener('input', (e)=>{
+    const id=e.target.getAttribute('data-note'); if(!id) return;
+    const step=steps.find(x=>x.id===id); step.note=e.target.value; store.set('cerSteps', state.steps);
+  });
+  box.addEventListener('click', (e)=>{
+    if(e.target && e.target.getAttribute('data-adddoc')){
+      const id=e.target.getAttribute('data-adddoc'); const file = box.querySelector('[data-file="'+id+'"]').files[0]; if(!file) return;
+      const fr=new FileReader(); fr.onload=()=>{
+        const base64=String(fr.result).split(',')[1]||'';
+        (state.cerDocs[cerId]||(state.cerDocs[cerId]=[])).push({id:crypto.randomUUID(),name:file.name,type:file.type,sizeB:file.size,base64,stepId:id});
+        const step=steps.find(x=>x.id===id); step.docIds.push(state.cerDocs[cerId][state.cerDocs[cerId].length-1].id);
+        store.set('cerDocs', state.cerDocs); store.set('cerSteps', state.steps);
+        alert('Documento allegato allo step.');
+      }; fr.readAsDataURL(file);
+    }
+    if(e.target && e.target.getAttribute('data-viewdocs')){
+      const id=e.target.getAttribute('data-viewdocs'); const list=(state.cerDocs[cerId]||[]).filter(d=>d.stepId===id);
+      if(!list.length){ alert('Nessun documento per questo step.'); return; }
+      const names=list.map(d=>d.name).join('\\n- ');
+      alert('Documenti step:\\n- '+names);
+    }
+  });
+  return box;
+}
+function renderGSE(cerId){
+  const wrap=document.createElement('div');
+  wrap.innerHTML=`
+    <p class="muted">Sezione in costruzione: import dei report GSE di energia condivisa e calcolo riparti.</p>
+    <div class="row"><input type="file" id="gseFile_${cerId}" accept=".csv"><button class="secondary" type="button" data-gseimp="${cerId}">Importa CSV GSE</button></div>
+    <small class="help">Formato atteso: CSV con colonne minime (Data/Cliente/kWh condivisi). In questa versione il file viene solo memorizzato come allegato GSE.</small>
+  `;
+  wrap.addEventListener('click',(e)=>{
+    if(e.target && e.target.getAttribute('data-gseimp')){
+      const id=e.target.getAttribute('data-gseimp'); const input=wrap.querySelector('#gseFile_'+id); const f=input.files[0]; if(!f){ alert('Seleziona un file CSV.'); return; }
+      const fr=new FileReader(); fr.onload=()=>{
+        const base64=String(fr.result).split(',')[1]||'';
+        (state.cerDocs[id]||(state.cerDocs[id]=[])).push({id:crypto.randomUUID(),name:f.name,type:f.type||'text/csv',sizeB:f.size,base64,gse:true});
+        store.set('cerDocs', state.cerDocs);
+        alert('CSV GSE caricato e associato alla CER (placeholder).');
+      }; fr.readAsDataURL(f);
+    }
+  });
+  return wrap;
+}
+
+// Current CER
+function openCER(id){
+  currentCERId=id;
+  const sch=deriveSchema(id); const idx=state.cer.findIndex(x=>x.id===id); if(idx>=0){state.cer[idx].ripSchema=sch; store.set('cer',state.cer)}
+  setSchemaBadge(qs('#schemaBadge'), sch); setSchemaBadge(qs('#schemaBadgeCur'), sch); updateRipHelp(sch);
+  renderParts(); renderImpianti(); renderDocs(); renderCons();
+}
+window.openCER=openCER;
+
+// Partecipanti
+function renderParts(){const tb=qs('#tblPart tbody'); tb.innerHTML=''; const rows=state.partecipanti.filter(p=>p.cerId===currentCERId); rows.forEach(p=>{const cli=state.clienti.find(c=>c.id===p.clienteId); const imp=state.impianti.find(i=>i.id===p.impiantoId); const tr=document.createElement('tr'); tr.innerHTML=`<td>${cli?cli.nome:''}</td><td>${p.ruolo}</td><td>${imp?imp.nome:'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'}</td><td><button class="secondary" data-pr="${p.id}">Rimuovi</button></td>`; tb.appendChild(tr)}); qsa('[data-pr]').forEach(b=>b.onclick=()=>{state.partecipanti=state.partecipanti.filter(x=>x.id!==b.dataset.pr); store.set('partecipanti',state.partecipanti); renderParts(); openCER(currentCERId)})}
+qs('#formPart').addEventListener('submit',(e)=>{e.preventDefault(); if(!currentCERId){alert('Seleziona una CER nellÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢elenco'); return} const clienteId=qs('#selCliente').value; const ruolo=qs('#selRuolo').value; if(ruolo!=='consumer'){const hasImp=state.impianti.some(i=>i.clienteId===clienteId); if(!hasImp){alert('Serve un impianto per questo cliente'); return}} const imp = (ruolo==='consumer')?null:(state.impianti.find(i=>i.clienteId===clienteId)||null); state.partecipanti.push({id:crypto.randomUUID(),cerId:currentCERId,clienteId,ruolo,impiantoId:imp?imp.id:null}); store.set('partecipanti',state.partecipanti); renderParts(); openCER(currentCERId)});
+
+// Impianti
+function renderImpianti(){const tb=qs('#tblImp tbody'); tb.innerHTML=''; state.impianti.forEach(i=>{const cli=state.clienti.find(c=>c.id===i.clienteId); const tr=document.createElement('tr'); tr.innerHTML=`<td>${cli?cli.nome:''}</td><td>${i.nome}</td><td>${i.kwp||''}</td><td>${i.kwhAnno||''}</td><td>${i.lat||''}</td><td>${i.lon||''}</td><td><button class="secondary" data-imr="${i.id}">Rimuovi</button></td>`; tb.appendChild(tr)}); qsa('[data-imr]').forEach(b=>b.onclick=()=>{state.impianti=state.impianti.filter(x=>x.id!==b.dataset.imr); store.set('impianti',state.impianti); renderImpianti(); openCER(currentCERId)})}
+qs('#formImp').addEventListener('submit',(e)=>{e.preventDefault(); const clienteId=qs('#impCliente').value; const i={id:crypto.randomUUID(),clienteId,nome:qs('#impNome').value.trim(),kwp:+qs('#impKwp').value||0,kwhAnno:+qs('#impKwh').value||0,lat:+qs('#impLat').value||null,lon:+qs('#impLon').value||null}; state.impianti.push(i); store.set('impianti',state.impianti); e.target.reset(); renderImpianti()});
+
+// Documenti CER (generali)
+function renderDocs(){const tb=qs('#tblDocs tbody'); tb.innerHTML=''; const docs=(state.cerDocs[currentCERId]||[]); docs.forEach(d=>{const tr=document.createElement('tr'); tr.innerHTML=`<td>${d.name}</td><td>${d.type||'ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â'}</td><td>${(d.sizeB/1024).toFixed(1)} KB</td><td><button class="secondary" data-dd="${d.id}">Download</button> <button class="secondary" data-dx="${d.id}">Rimuovi</button></td>`; tb.appendChild(tr)}); qsa('[data-dd]').forEach(b=>b.onclick=()=>{const d=(state.cerDocs[currentCERId]||[]).find(x=>x.id===b.dataset.dd); if(!d) return; const blob=new Blob([Uint8Array.from(atob(d.base64),c=>c.charCodeAt(0))],{type:d.type||'application/octet-stream'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=d.name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),300)}); qsa('[data-dx]').forEach(b=>b.onclick=()=>{state.cerDocs[currentCERId]=(state.cerDocs[currentCERId]||[]).filter(x=>x.id!==b.dataset.dx); store.set('cerDocs',state.cerDocs); renderDocs()})}
+qs('#btnAddCerDoc').addEventListener('click',()=>{const f=qs('#docFile').files[0]; if(!currentCERId){alert('Seleziona una CER'); return} if(!f) return; const fr=new FileReader(); fr.onload=()=>{const base64=String(fr.result).split(',')[1]||''; (state.cerDocs[currentCERId]||(state.cerDocs[currentCERId]=[])).push({id:crypto.randomUUID(),name:f.name,type:f.type,sizeB:f.size,base64}); store.set('cerDocs',state.cerDocs); qs('#docFile').value=''; renderDocs()}; fr.readAsDataURL(f)});
+
+// Consumi
+function renderCons(){const tb=qs('#tblCons tbody'); tb.innerHTML=''; Object.entries(state.consumi).forEach(([cid,arr])=>{const cli=state.clienti.find(c=>c.id===cid); (arr||[]).forEach(r=>{const tr=document.createElement('tr'); tr.innerHTML=`<td>${cli?cli.nome:''}</td><td>${r.month}</td><td>${r.kwh}</td><td><button class="secondary" data-cr="${cid}::${r.month}">Rimuovi</button></td>`; tb.appendChild(tr)})}); qsa('[data-cr]').forEach(b=>b.onclick=()=>{const [cid,m]=b.dataset.cr.split('::'); state.consumi[cid]=(state.consumi[cid]||[]).filter(x=>x.month!==m); store.set('consumi',state.consumi); renderCons()})}
+qs('#formCons').addEventListener('submit',(e)=>{e.preventDefault(); const cid=qs('#consCliente').value, m=qs('#consMese').value, k=+qs('#consKwh').value||0; (state.consumi[cid]||(state.consumi[cid]=[])); const i=state.consumi[cid].findIndex(x=>x.month===m); if(i>=0) state.consumi[cid][i].kwh=k; else state.consumi[cid].push({month:m,kwh:k}); store.set('consumi',state.consumi); e.target.reset(); renderCons()});
+
+// Init
+fillClientSelects(); renderList(); renderImpianti(); renderCons();
+</script>
+
+<script>
+// --- v9 patches: migration + reset + schema badge sync ---
+(function(){
+  const store={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(_){return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+  if(!('crypto' in window) || !('randomUUID' in crypto)){
+    window.crypto = window.crypto || {};
+    crypto.randomUUID = function(){return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})};
+  }
+  const normalizeCER = (c)=>{
+    c=c||{}; const rip=c.rip||{};
+    const gest = Number(rip.gestore ?? rip.gest ?? c.gestore ?? 0) || 0;
+    const mid  = Number(rip.mid ?? rip.pros ?? rip.prod ?? c.pros ?? c.prod ?? 0) || 0;
+    const cer  = Number(rip.cer ?? c.cer ?? 0) || 0;
+    c.rip={gestore:gest, pros: (c.rip?.pros||0), prod:(c.rip?.prod||0), cer:cer}; // keep pros/prod for schema
+    return c;
+  };
+  try{
+    const cer = store.get('cer',[]);
+    if(Array.isArray(cer) && cer.length){
+      const fixed = cer.map(normalizeCER);
+      store.set('cer', fixed);
+    }
+  }catch(e){ console.warn('Migration skip', e); }
+
+  // add Reset UI
+  const listCard = document.querySelector('h3:contains("Elenco CER")')?.closest('.card') || document.querySelector('#tblCER')?.closest('.card');
+  const container = document.querySelector('#tblCER')?.closest('.card');
+  if(container && !document.getElementById('btnReset')){
+    const tools = document.createElement('div'); tools.className='row'; tools.style.justifyContent='flex-end';
+    tools.innerHTML='<button id="btnReset" class="danger" type="button">Reset dati (localStorage)</button>';
+    container.insertBefore(tools, container.children[1]);
+    tools.querySelector('#btnReset').addEventListener('click', ()=>{
+      if(!confirm('Svuotare i dati locali?')) return;
+      localStorage.clear(); location.reload();
+    });
+  }
+})();
+</script>
+
+<script>
+document.addEventListener('click', function(e){
+  const t = e.target;
+  if(t.matches('button, a')){
+    const label = (t.textContent||'').trim().toLowerCase();
+    if(label === 'apri'){
+      // cerca un pulsante 'Dettaglio' nella stessa riga ed eseguilo
+      const row = t.closest('tr');
+      const det = row && row.querySelector('button, a');
+      const match = row && Array.from(row.querySelectorAll('button,a')).find(x => (x.textContent||'').trim().toLowerCase() === 'dettaglio');
+      if(match){ match.click(); e.preventDefault(); }
+    }
+  }
+}, {passive:false});
+</script></body>
+</html>

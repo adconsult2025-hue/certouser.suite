@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang='it'>
+<head>
+  <meta charset="utf-8">
+  <meta charset='utf-8'/>
+  <title>Roles Smoke Test</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'/>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    input, select, button { margin: 4px 0; padding: 8px; }
+    pre { background:#f6f6f6; padding:12px; border-radius:8px; }
+  </style>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="theme-dark">
+  <h1>Roles ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ Smoke Test</h1>
+
+  <div>
+    <label>Email</label><br/>
+    <input id="email" placeholder="admin@certouser.it" style="width:320px"/>
+  </div>
+  <div>
+    <label>Ruolo</label><br/>
+    <select id="role">
+      <option>SUPERADMIN</option>
+      <option>ADMIN_CER</option>
+      <option>COLLABORATORE</option>
+      <option>VIEWER</option>
+    </select>
+  </div>
+  <div>
+    <label>cer_id (opzionale)</label><br/>
+    <input id="cer" placeholder="es. CER123"/>
+  </div>
+  <div>
+    <label>territori (opzionale)</label><br/>
+    <input id="territori" placeholder="FR001;RM002" style="width:320px"/>
+  </div>
+
+  <p>
+    <button id="btnList">List</button>
+    <button id="btnAssign">Assign/Upsert</button>
+    <button id="btnRevoke">Revoke</button>
+  </p>
+
+  <h3>Output</h3>
+  <pre id="out">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦</pre>
+
+  <script>
+    const API = '/.netlify/functions/roles';
+    const out = document.getElementById('out');
+    const show = (o) => out.textContent = typeof o === 'string' ? o : JSON.stringify(o, null, 2);
+
+    document.getElementById('btnList').onclick = async () => {
+      try { const r = await fetch(API); show(await r.json()); } catch(e){ show(String(e)); }
+    };
+
+    document.getElementById('btnAssign').onclick = async () => {
+      const payload = {
+        email: document.getElementById('email').value.trim(),
+        role: document.getElementById('role').value.trim(),
+        cer_id: document.getElementById('cer').value.trim(),
+        territori: document.getElementById('territori').value.trim(),
+        display_name: 'Admin'
+      };
+      try {
+        const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        show(await r.json());
+      } catch(e){ show(String(e)); }
+    };
+
+    document.getElementById('btnRevoke').onclick = async () => {
+      const payload = { email: document.getElementById('email').value.trim(), action:'revoke' };
+      try {
+        const r = await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        show(await r.json());
+      } catch(e){ show(String(e)); }
+    };
+  </script>
+</body>
+</html>

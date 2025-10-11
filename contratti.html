@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <title>CERtoUSER ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Documenti & Contratti</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/docbuilder.css">
+</head>
+<body class="theme-dark">
+  <header class="sticky top-0">
+    <h1>Documenti & Contratti</h1>
+    <nav>
+      <a class="btn" href="/index.html">Home</a>
+      <a class="btn" href="/crm.html">CRM</a>
+      <a class="btn" href="/cer.html">CER</a>
+      <a href="/contratti.html" class="active">Contratti</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Genera Modelli</h2>
+      <p>Seleziona il modello e compila i campi. In modalitÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  statica scarichi un TXT dimostrativo; con le Functions attive generiamo un DOCX compilato.</p>
+      <div class="grid">
+        <label>Modello
+          <select id="model">
+            <option value="modello_adesione_CERtoUSER.docx">Adesione CER (CERtoUSER)</option>
+            <option value="modello_licenza_marchio_CERtoUSER.docx">Licenza Marchio (CERtoUSER)</option>
+          </select>
+        </label>
+        <label>Ragione Sociale / Nome
+          <input id="p_name" placeholder="Es. OMNIA X S.r.l. / Mario Rossi">
+        </label>
+        <label>Cod. Fiscale / P.IVA
+          <input id="p_tax" placeholder="Es. 01234567890">
+        </label>
+        <label>Cabina Primaria
+          <input id="cabina" placeholder="Es. FR001">
+        </label>
+      </div>
+      <button id="btn-genera">Genera Documento</button>
+      <div id="gen-result"></div>
+    </section>
+
+    <section class="card">
+      <h2>Template disponibili</h2>
+      <ul id="tpl-list">
+        <li><a class="btn" href="/assets/templates/modello_adesione_CERtoUSER.docx" download>modello_adesione_CERtoUSER.docx</a></li>
+        <li><a class="btn" href="/assets/templates/modello_licenza_marchio_CERtoUSER.docx" download>modello_licenza_marchio_CERtoUSER.docx</a></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Allegati caricati (demo)</h2>
+      <p>Anteprima UX dellÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢elenco allegati. Il salvataggio reale verrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  collegato a Functions/DB.</p>
+      <ul id="uploads"></ul>
+      <label class="upload">
+        <input type="file" id="fileInput" multiple>
+        <span>Carica allegati</span>
+      </label>
+    </section>
+  </main>
+
+  <script src="/js/docbuilder.js"></script>
+</body>
+</html>

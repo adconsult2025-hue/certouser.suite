@@ -1,0 +1,6 @@
+CERtoUSER Suite MERGED (2025-10-10)
+- Base: deploy-68e9124c79c16d13c40d2aad.zip
+- CRM from v19 dir: NOT FOUND
+- CER from v9 dir: NOT FOUND
+- Edited hub indexes: []
+- Extra notes: ['Created _headers', 'Added deploy_netlify.ps1']

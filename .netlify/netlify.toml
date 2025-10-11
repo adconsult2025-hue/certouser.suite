@@ -1,0 +1,65 @@
+functionsDirectory = "C:\\Users\\adcon\\Downloads\\CERtoUSER_Suite_MERGED_20251010\\netlify\\functions"
+functionsDirectoryOrigin = "config"
+headersOrigin = "config"
+redirects = []
+
+[build]
+publish = "C:\\Users\\adcon\\Downloads\\CERtoUSER_Suite_MERGED_20251010"
+publishOrigin = "config"
+functions = "C:\\Users\\adcon\\Downloads\\CERtoUSER_Suite_MERGED_20251010\\netlify\\functions"
+
+[build.environment]
+NODE_VERSION = "20"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+node_bundler = "esbuild"
+
+[[plugins]]
+origin = "ui"
+package = "@netlify/plugin-lighthouse"
+
+[plugins.inputs]
+
+[[headers]]
+for = "/*.html"
+
+[headers.values]
+Content-Type = "text/html; charset=utf-8"
+
+[[headers]]
+for = "/*.css"
+
+[headers.values]
+Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+for = "/*.js"
+
+[headers.values]
+Content-Type = "application/javascript; charset=utf-8"
+
+[[headers]]
+for = "/assets/templates/*"
+
+[headers.values]
+Content-Type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Content-Type-Options = "nosniff"

@@ -1,0 +1,10 @@
+# Enforce UTF-8 and correct MIME
+/*.html
+  Content-Type: text/html; charset=utf-8
+/*.css
+  Content-Type: text/css; charset=utf-8
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+/assets/templates/*
+  Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
