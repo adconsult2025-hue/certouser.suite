@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "license": "UNLICENSED",
+  "scripts": {
+    "test": "node --test netlify/functions/__tests__/*.test.js"
+  },
   "dependencies": {
     "firebase-admin": "^12.6.0",
     "pg": "^8.12.0"
