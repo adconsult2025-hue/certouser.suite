@@ -119,6 +119,17 @@ app.get('/clients', authRequired, async (req, res) => {
 });
 app.get('/cers', authRequired, async (req, res) => {
   const acc = await loadAccess(req.user.uid, req.user);
+  // If Firestore collection exists, prefer it; otherwise return in-memory DB
+  try {
+    const snap = await admin.firestore().collection('cers').get();
+    if (!snap.empty) {
+      const rows = [];
+      snap.forEach(doc => rows.push({ docId: doc.id, ...doc.data() }));
+      return res.json(rows.filter(scopeFilter(acc.scope)));
+    }
+  } catch (e) {
+    // ignore and fallback to in-memory DB
+  }
   res.json(DB.cers.filter(scopeFilter(acc.scope)));
 });
 
@@ -133,6 +144,48 @@ app.post('/clients', authRequired, roleRequired(ROLES.ADMIN, ROLES.PRODUCER), as
   const row = { id, name: body.name, email: body.email, cerId: body.cerId || null, province: body.province || null };
   DB.clients.push(row);
   res.json(row);
+});
+
+/**
+ * CREATE CER / IMPIANTO
+ * Body example: { id?: string, nome: string, cabina?: string, province?: string, meta?: {...} }
+ * Requires authentication and role ADMIN or PRODUCER (configurabile).
+ */
+app.post('/cers', authRequired, roleRequired(ROLES.ADMIN, ROLES.PRODUCER), async (req, res) => {
+  try {
+    const acc = await loadAccess(req.user.uid, req.user);
+    const body = req.body || {};
+    if (!body.nome) return res.status(400).json({ error: 'nome required' });
+
+    const newCer = {
+      id: body.id || `CER${Date.now()}`,
+      nome: body.nome,
+      cabina: body.cabina || null,
+      province: body.province || null,
+      meta: body.meta || {},
+      createdBy: req.user.uid || null,
+      createdAt: admin.firestore && admin.firestore.FieldValue ? admin.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+    };
+
+    const target = { cerId: newCer.id, province: newCer.province, clientId: null };
+    if (!inScope(acc.scope, target)) return res.status(403).json({ error: 'Out of scope' });
+
+    // Try to persist to Firestore; on error fallback to in-memory DB
+    try {
+      const docRef = await admin.firestore().collection('cers').add(newCer);
+      const docSnap = await docRef.get();
+      const saved = { docId: docRef.id, ...(docSnap.exists ? docSnap.data() : newCer) };
+      return res.status(201).json({ ok: true, cer: saved });
+    } catch (e) {
+      console.error('Firestore write failed, falling back to in-memory DB', e);
+      // push to in-memory DB for demo environments
+      DB.cers.push(newCer);
+      return res.status(201).json({ ok: true, cer: newCer, fallback: true });
+    }
+  } catch (err) {
+    console.error('create cer error', err);
+    res.status(500).json({ error: err.message || 'internal error' });
+  }
 });
 
 // ====== ADMIN MANAGEMENT (superadmin only) ======
@@ -178,4 +231,3 @@ app.post('/admin/setAccess', authRequired, superadminRequired, async (req, res) 
 });
 
 exports.api = functions.region('europe-west1').https.onRequest(app);
-
